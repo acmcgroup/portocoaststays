@@ -1,7 +1,7 @@
 # Netlify: static site lives in /website (not repo root)
 [build]
   publish = "website"
-  # No build step — plain HTML/CSS
+  # No build step - plain HTML/CSS
 
 [[headers]]
   for = "/*"

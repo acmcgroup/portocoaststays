@@ -1,4 +1,4 @@
-# Homestay — Brand Kit
+# Homestay - Brand Kit
 
 Identidade visual completa. Todos os ficheiros do website usam este sistema.
 
@@ -137,4 +137,4 @@ padding: 2rem;
 - Não usar mais de 2 pesos de fonte por página
 - Não usar cor verde em texto corrido (só em accents e CTAs)
 - Não usar border-radius > 12px (parece demasiado tech/startup)
-- Não usar fundo completamente preto (#000) — sempre cream ou ink (#1A1714)
+- Não usar fundo completamente preto (#000) - sempre cream ou ink (#1A1714)
