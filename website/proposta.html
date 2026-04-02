@@ -5,296 +5,300 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Proposta — Homestay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --ink: #0D1117; --ink2: #1C2333;
-      --blue: #4F7EFF; --teal: #00C9A7; --amber: #F59E0B;
-      --white: #F9FAFB; --muted: #8892A4;
-      --border: rgba(255,255,255,0.08);
-      --card: rgba(255,255,255,0.04);
-      --success: #10B981; --danger: #EF4444;
+      --cream:        #FAF8F5;
+      --cream-2:      #F2EDE6;
+      --cream-3:      #E8E0D5;
+      --ink:          #1A1714;
+      --ink-2:        #3D3630;
+      --muted:        #7A6F67;
+      --muted-light:  #B0A49C;
+      --green:        #2B4C3F;
+      --green-light:  #3D6B58;
+      --green-pale:   rgba(43,76,63,0.08);
+      --amber:        #C4956A;
+      --amber-pale:   rgba(196,149,106,0.14);
+      --border:       rgba(26,23,20,0.1);
+      --border-s:     rgba(26,23,20,0.18);
+      --danger:       #B04040;
     }
     html { scroll-behavior: smooth; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--ink); color: var(--white); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--ink); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    body.unlocked { overflow: auto; }
+    h1,h2,h3,h4 { font-family: 'Cormorant Garamond', serif; font-weight: 500; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+    .tag {
+      display: inline-block;
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--green);
+      border-bottom: 1px solid var(--green); padding-bottom: 2px;
+      margin-bottom: 1rem;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 2rem; border-radius: 3px; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 0.82rem;
+      font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      text-decoration: none; border: none; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--green); color: #fff; }
+    .btn-primary:hover { background: var(--green-light); }
+    .btn-outline { background: transparent; border: 1px solid var(--border-s); color: var(--ink); }
+    .btn-outline:hover { background: var(--cream-2); }
 
     /* ─── PASSWORD GATE ─── */
     #gate {
       position: fixed; inset: 0; z-index: 9999;
       display: flex; align-items: center; justify-content: center;
-      background: var(--ink);
-    }
-    #gate::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse 70% 50% at 50% 30%, rgba(79,126,255,0.1) 0%, transparent 70%);
+      background: var(--cream);
     }
     .gate-box {
-      position: relative; z-index: 1;
-      background: var(--ink2); border: 1px solid var(--border);
-      border-radius: 20px; padding: 3rem 2.5rem;
-      width: 100%; max-width: 420px;
-      text-align: center;
-      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+      width: 100%; max-width: 440px;
+      padding: 3rem 2.5rem; text-align: center;
+      border: 1px solid var(--border-s); border-radius: 4px;
+      background: var(--cream-2);
     }
-    .gate-lock {
-      width: 64px; height: 64px; border-radius: 16px;
-      background: rgba(79,126,255,0.12); border: 1px solid rgba(79,126,255,0.25);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.8rem; margin: 0 auto 1.75rem;
+    .gate-eyebrow {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--green); margin-bottom: 1.5rem;
     }
-    .gate-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.4rem; }
-    .gate-sub { font-size: 0.9rem; color: var(--muted); margin-bottom: 2rem; }
+    .gate-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem; font-weight: 400; letter-spacing: -0.01em;
+      margin-bottom: 0.5rem;
+    }
+    .gate-sub { font-size: 0.88rem; color: var(--muted); margin-bottom: 2.5rem; font-weight: 300; line-height: 1.6; }
     .gate-input {
-      width: 100%; padding: 0.85rem 1.1rem;
-      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
-      border-radius: 10px; color: var(--white);
-      font-size: 1rem; font-family: 'DM Sans', sans-serif;
-      margin-bottom: 0.75rem; outline: none;
+      width: 100%; padding: 0.9rem 1.1rem;
+      background: var(--cream); border: 1px solid var(--border-s);
+      border-radius: 3px; color: var(--ink);
+      font-family: 'Inter', sans-serif; font-size: 0.95rem;
+      letter-spacing: 0.15em; text-align: center;
+      outline: none; margin-bottom: 0.75rem;
       transition: border-color 0.2s;
-      letter-spacing: 0.1em; text-align: center;
     }
-    .gate-input:focus { border-color: rgba(79,126,255,0.5); }
-    .gate-input.error { border-color: var(--danger); animation: shake 0.4s ease; }
-    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    .gate-input:focus { border-color: var(--green); }
+    .gate-input.error { border-color: var(--danger); animation: shake 0.4s; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 30%{transform:translateX(-6px)} 70%{transform:translateX(6px)} }
     .gate-btn {
       width: 100%; padding: 0.9rem;
-      background: var(--blue); color: #fff;
-      border: none; border-radius: 10px;
-      font-size: 1rem; font-weight: 600; cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: background 0.2s, transform 0.15s;
+      background: var(--green); color: #fff;
+      border: none; border-radius: 3px; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 0.82rem;
+      font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      transition: background 0.2s;
     }
-    .gate-btn:hover { background: #3B65E8; transform: translateY(-1px); }
-    .gate-error { font-size: 0.82rem; color: var(--danger); margin-top: 0.75rem; display: none; }
+    .gate-btn:hover { background: var(--green-light); }
+    .gate-error { font-size: 0.78rem; color: var(--danger); margin-top: 0.75rem; display: none; }
 
-    /* ─── PROPOSAL CONTENT ─── */
+    /* ─── PROPOSAL ─── */
     #proposal { display: none; }
 
     /* NAV */
     .prop-nav {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1.25rem 2.5rem;
-      border-bottom: 1px solid var(--border);
-      background: rgba(13,17,23,0.9); backdrop-filter: blur(12px);
       position: sticky; top: 0; z-index: 50;
+      background: var(--cream); border-bottom: 1px solid var(--border);
     }
-    .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; text-decoration: none; color: var(--white); }
-    .nav-logo span { color: var(--blue); }
-    .nav-meta { font-size: 0.8rem; color: var(--muted); }
-
-    .main { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; }
+    .prop-nav-inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+    }
+    .nav-logo { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 1.3rem; text-decoration: none; color: var(--ink); }
+    .nav-logo span { font-style: italic; color: var(--green); }
+    .nav-conf { font-size: 0.72rem; color: var(--muted-light); letter-spacing: 0.08em; text-transform: uppercase; }
 
     /* HERO */
     .prop-hero {
-      padding: 5rem 0 3rem;
+      padding: 5rem 0 4rem;
+      border-bottom: 1px solid var(--border);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: end;
+    }
+    .prop-hero h1 {
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 300; line-height: 1.05; letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+    .prop-hero h1 em { color: var(--green); }
+    .prop-hero-lead { font-size: 1rem; color: var(--muted); line-height: 1.75; font-weight: 300; }
+    .hero-summary {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+      border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+    }
+    .hs-item {
+      padding: 1.5rem;
+      border-right: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
-    .prop-badge {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.35rem 0.9rem; border-radius: 999px;
-      background: rgba(79,126,255,0.1); border: 1px solid rgba(79,126,255,0.25);
-      font-size: 0.75rem; color: #91B4FF; font-weight: 600;
-      letter-spacing: 0.06em; text-transform: uppercase;
-      margin-bottom: 1.5rem;
-    }
-    .prop-title { font-family: 'Syne', sans-serif; font-size: clamp(2rem,5vw,3.2rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
-    .prop-title em { color: var(--blue); font-style: normal; }
-    .prop-intro { font-size: 1.05rem; color: var(--muted); max-width: 580px; line-height: 1.75; margin-bottom: 2.5rem; }
-    .prop-summary-cards {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-    }
-    .summary-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 1.25rem 1.5rem;
-    }
-    .summary-card-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-bottom: 0.4rem; }
-    .summary-card-val { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; }
-    .summary-card-val.green { color: var(--teal); }
-    .summary-card-val.blue { color: var(--blue); }
-    .summary-card-sub { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+    .hs-item:nth-child(2n) { border-right: none; }
+    .hs-item:nth-last-child(-n+2) { border-bottom: none; }
+    .hs-item:nth-child(3), .hs-item:nth-child(4) { border-bottom: none; }
+    .hs-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+    .hs-val { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 400; color: var(--ink); line-height: 1; }
+    .hs-val.green { color: var(--green); }
+    .hs-val.amber { color: var(--amber); }
+    .hs-sub { font-size: 0.75rem; color: var(--muted-light); margin-top: 0.25rem; font-weight: 300; }
 
-    /* SECTION HEADERS */
-    .section { padding: 4rem 0; border-bottom: 1px solid var(--border); }
-    .section:last-child { border-bottom: none; }
-    .section-tag { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 0.6rem; }
-    h2 { font-family: 'Syne', sans-serif; font-size: clamp(1.4rem,3vw,2rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
-    .lead { font-size: 0.95rem; color: var(--muted); margin-bottom: 2.5rem; }
+    /* SECTION */
+    .psection { padding: 4.5rem 0; border-bottom: 1px solid var(--border); }
+    .psection:last-of-type { border-bottom: none; }
+    .psection.alt { background: var(--cream-2); }
+    h2.phead {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 400; letter-spacing: -0.015em; margin-bottom: 0.5rem; line-height: 1.2;
+    }
+    h2.phead em { font-style: italic; color: var(--green); }
+    p.plead { font-size: 0.92rem; color: var(--muted); line-height: 1.75; margin-bottom: 2.5rem; font-weight: 300; }
 
     /* PROPERTY CARDS */
     .prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    @media(max-width:680px){ .prop-grid { grid-template-columns: 1fr; } }
-    .prop-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; overflow: hidden;
-    }
-    .prop-card-header {
-      padding: 1.5rem 1.75rem 0;
-    }
-    .prop-card-type {
-      display: inline-block; padding: 0.25rem 0.7rem;
-      background: rgba(79,126,255,0.12); border-radius: 6px;
-      font-size: 0.72rem; font-weight: 700; color: var(--blue);
-      letter-spacing: 0.06em; text-transform: uppercase;
-      margin-bottom: 0.75rem;
-    }
-    .prop-card-name { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 0.2rem; }
-    .prop-card-addr { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.5rem; }
-    .prop-card-divider { height: 1px; background: var(--border); margin: 0 1.75rem; }
+    .prop-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+    .prop-card-head { padding: 1.5rem 1.75rem 1.25rem; border-bottom: 1px solid var(--border); }
+    .prop-card-type { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-bottom: 0.5rem; }
+    .prop-card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 500; margin-bottom: 0.2rem; line-height: 1.2; }
+    .prop-card-addr { font-size: 0.78rem; color: var(--muted); font-weight: 300; }
     .prop-card-body { padding: 1.5rem 1.75rem; }
-    .prop-scenario { margin-bottom: 1rem; }
-    .scenario-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0.7rem 1rem; border-radius: 8px;
-      margin-bottom: 0.4rem;
-      font-size: 0.87rem;
-      transition: background 0.15s;
+    .scenario-header {
+      display: grid; grid-template-columns: 70px 1fr 1fr;
+      padding: 0 0.5rem 0.6rem;
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted-light);
     }
-    .scenario-row:hover { background: rgba(255,255,255,0.03); }
-    .scenario-row.highlight { background: rgba(0,201,167,0.08); border: 1px solid rgba(0,201,167,0.2); }
-    .scenario-occ { color: var(--muted); font-weight: 500; }
-    .scenario-gross { color: #C9D1DD; }
-    .scenario-net { font-weight: 700; }
-    .scenario-net.good { color: var(--teal); }
-    .scenario-badge { font-size: 0.68rem; background: var(--teal); color: #000; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 700; }
-    .prop-card-footnote { font-size: 0.75rem; color: var(--muted); margin-top: 1rem; line-height: 1.6; }
-
-    /* COMBINED TABLE */
-    .data-table {
-      width: 100%; border-collapse: collapse;
-      border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
-      font-size: 0.88rem;
+    .scenario {
+      display: grid; grid-template-columns: 70px 1fr 1fr;
+      padding: 0.75rem 0.5rem; border-top: 1px solid var(--border);
+      align-items: baseline; transition: background 0.15s;
     }
-    .data-table th {
-      padding: 0.85rem 1.25rem; text-align: left;
-      background: rgba(255,255,255,0.04);
-      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-      color: var(--muted); border-bottom: 1px solid var(--border);
+    .scenario:hover { background: var(--cream-2); }
+    .scenario.base {
+      background: var(--green-pale);
+      border-color: rgba(43,76,63,0.15);
     }
-    .data-table td {
-      padding: 0.85rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      color: #C9D1DD;
-    }
-    .data-table tr:last-child td { border-bottom: none; }
-    .data-table tr:hover td { background: rgba(255,255,255,0.02); }
-    .data-table td:first-child { color: var(--white); font-weight: 500; }
-    .data-table .total-row td { background: rgba(0,201,167,0.06); color: var(--white); font-weight: 700; border-top: 1px solid rgba(0,201,167,0.2); }
-    .data-table .good { color: var(--teal); font-weight: 700; }
-    .data-table .muted { color: var(--muted); }
-    .data-table .blue { color: var(--blue); font-weight: 700; }
+    .sc-occ { font-size: 0.82rem; color: var(--muted); font-weight: 400; }
+    .scenario.base .sc-occ { color: var(--green); font-weight: 600; }
+    .sc-gross { font-size: 0.85rem; color: var(--ink-2); }
+    .sc-net { font-size: 0.92rem; font-weight: 600; color: var(--ink); }
+    .scenario.base .sc-net { color: var(--green); }
+    .sc-badge { display: inline-block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: var(--green); color: #fff; padding: 0.15rem 0.45rem; border-radius: 2px; margin-left: 0.4rem; vertical-align: middle; }
+    .prop-card-footnote { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.72rem; color: var(--muted-light); line-height: 1.6; font-weight: 300; }
 
     /* FLOW */
-    .flow {
-      background: rgba(79,126,255,0.04); border: 1px solid rgba(79,126,255,0.15);
-      border-radius: 14px; padding: 2rem;
-      font-size: 0.9rem; font-family: 'DM Sans', sans-serif;
-    }
-    .flow-row {
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-      gap: 0.5rem; padding: 0.75rem 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
+    .flow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .flow-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .flow-card-title { padding: 1rem 1.5rem; background: var(--cream-2); border-bottom: 1px solid var(--border); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .flow-row { display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
     .flow-row:last-child { border-bottom: none; }
-    .flow-label { color: var(--muted); font-size: 0.85rem; }
-    .flow-val { font-weight: 700; }
-    .flow-val.sub { color: var(--danger); }
-    .flow-val.add { color: var(--teal); }
-    .flow-val.result { color: var(--white); font-size: 1rem; font-family: 'Syne', sans-serif; }
-
-    /* INCLUDES */
-    .includes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
-    .include-item {
-      display: flex; gap: 1rem; padding: 1.25rem;
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      align-items: flex-start;
-      transition: background 0.2s;
-    }
-    .include-item:hover { background: rgba(79,126,255,0.05); }
-    .include-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.1rem; }
-    .include-text h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.2rem; }
-    .include-text p { font-size: 0.8rem; color: var(--muted); line-height: 1.55; }
-
-    /* LEGAL */
-    .legal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-    .legal-item {
-      padding: 1.25rem;
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    }
-    .legal-item .tag {
-      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-      color: var(--blue); margin-bottom: 0.5rem;
-    }
-    .legal-item h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; }
-    .legal-item p { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
-
-    /* TIMELINE */
-    .timeline { position: relative; padding-left: 2rem; }
-    .timeline::before { content: ''; position: absolute; left: 0.4rem; top: 0.5rem; bottom: 0.5rem; width: 1px; background: var(--border); }
-    .timeline-item { position: relative; margin-bottom: 1.75rem; }
-    .timeline-item::before {
-      content: ''; position: absolute; left: -1.6rem; top: 0.4rem;
-      width: 10px; height: 10px; border-radius: 50%;
-      background: var(--blue); border: 2px solid var(--ink);
-    }
-    .timeline-day { font-size: 0.72rem; color: var(--blue); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.2rem; }
-    .timeline-title { font-weight: 700; margin-bottom: 0.2rem; font-size: 0.95rem; }
-    .timeline-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    .flow-row.total { background: var(--green-pale); }
+    .flow-label { color: var(--muted); font-weight: 300; }
+    .flow-val { font-weight: 600; color: var(--ink); font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; }
+    .flow-row.deduct .flow-val { color: var(--danger); }
+    .flow-row.total .flow-val { color: var(--green); font-size: 1.25rem; }
+    .flow-row.total .flow-label { color: var(--ink); font-weight: 500; }
+    .cleaning-note { margin-top: 1.5rem; padding: 1.25rem 1.5rem; background: var(--amber-pale); border: 1px solid rgba(196,149,106,0.25); border-radius: 4px; font-size: 0.82rem; color: var(--ink-2); line-height: 1.65; font-weight: 300; }
+    .cleaning-note strong { color: var(--ink); font-weight: 600; }
 
     /* COMPARISON */
-    .vs-table {
+    table.vs {
       width: 100%; border-collapse: collapse;
-      border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
-      font-size: 0.87rem;
+      border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
     }
-    .vs-table th {
-      padding: 1rem 1.25rem; text-align: left;
-      background: rgba(255,255,255,0.04);
-      font-size: 0.78rem; font-weight: 700;
+    table.vs thead th {
+      padding: 0.9rem 1.25rem; text-align: left;
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); background: var(--cream-2);
       border-bottom: 1px solid var(--border);
     }
-    .vs-table td { padding: 0.85rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .vs-table tr:last-child td { border-bottom: none; }
-    .vs-table td:first-child { color: var(--muted); font-size: 0.82rem; }
-    .vs-table .us { color: var(--teal); font-weight: 700; }
-    .vs-table .them { color: var(--muted); }
-    .vs-table .highlight-row td { background: rgba(0,201,167,0.05); }
+    table.vs thead th.ours { color: var(--green); background: var(--green-pale); }
+    table.vs tbody td { padding: 0.85rem 1.25rem; font-size: 0.85rem; border-bottom: 1px solid var(--border); font-weight: 300; }
+    table.vs tbody tr:last-child td { border-bottom: none; }
+    table.vs tbody tr:hover td { background: var(--cream-2); }
+    table.vs td:first-child { color: var(--muted); font-size: 0.78rem; font-weight: 400; }
+    table.vs td.good { color: var(--green); font-weight: 600; }
+    table.vs td.dim { color: var(--muted-light); }
+    table.vs tr.highlight-row td { background: rgba(43,76,63,0.04); }
+    table.vs tr.highlight-row td.good { font-size: 1rem; font-family: 'Cormorant Garamond', serif; }
+
+    /* INCLUDES */
+    .includes-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .include { padding: 1.75rem 1.5rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .include:hover { background: var(--cream); }
+    .include:nth-child(4n) { border-right: none; }
+    .include:nth-last-child(-n+4) { border-bottom: none; }
+    .include-num { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; color: var(--cream-3); line-height: 1; margin-bottom: 1rem; }
+    .include h4 { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.4rem; line-height: 1.3; }
+    .include p { font-size: 0.78rem; color: var(--muted); line-height: 1.65; font-weight: 300; }
+
+    /* LEGAL */
+    .legal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .legal-item { padding: 1.75rem 1.5rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .legal-item:nth-child(3n) { border-right: none; }
+    .legal-item:nth-last-child(-n+3) { border-bottom: none; }
+    .legal-tag { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.5rem; }
+    .legal-item h4 { font-size: 1rem; font-weight: 500; margin-bottom: 0.4rem; }
+    .legal-item p { font-size: 0.78rem; color: var(--muted); line-height: 1.65; font-weight: 300; }
+
+    /* TIMELINE */
+    .tl { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .tl-item { display: grid; grid-template-columns: 100px 1fr; border-bottom: 1px solid var(--border); }
+    .tl-item:last-child { border-bottom: none; }
+    .tl-item:hover .tl-body { background: var(--cream-2); }
+    .tl-day { padding: 1.25rem 1.5rem; background: var(--cream-2); border-right: 1px solid var(--border); display: flex; align-items: center; }
+    .tl-day span { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); }
+    .tl-body { padding: 1.25rem 1.5rem; }
+    .tl-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--ink); }
+    .tl-desc { font-size: 0.8rem; color: var(--muted); font-weight: 300; line-height: 1.55; }
+    .tl-done .tl-day { background: var(--green-pale); }
+    .tl-done .tl-day span { color: var(--green); }
 
     /* CTA */
-    .prop-cta {
-      background: rgba(79,126,255,0.06); border: 1px solid rgba(79,126,255,0.2);
-      border-radius: 16px; padding: 3rem; text-align: center; margin: 3rem 0;
+    .prop-cta { background: var(--ink); color: #fff; padding: 4rem; border-radius: 4px; text-align: center; margin: 3rem 0 4rem; }
+    .prop-cta .tag { color: var(--amber); border-color: var(--amber); }
+    .prop-cta h2 { color: #fff; font-size: clamp(1.8rem,4vw,2.8rem); margin-bottom: 0.75rem; }
+    .prop-cta p { color: rgba(255,255,255,0.5); margin-bottom: 2rem; max-width: 480px; margin-left: auto; margin-right: auto; font-weight: 300; }
+    .prop-cta .btn-primary { background: var(--amber); color: var(--ink); }
+    .prop-cta .btn-primary:hover { background: #d4a77c; }
+    .prop-cta .btn-outline { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.65); }
+    .prop-cta .btn-outline:hover { background: rgba(255,255,255,0.06); }
+
+    /* FOOTER */
+    footer { padding: 2.5rem 0; border-top: 1px solid var(--border); background: var(--cream-2); }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .footer-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 500; }
+    .footer-logo span { font-style: italic; color: var(--green); }
+    .footer-note { font-size: 0.72rem; color: var(--muted-light); }
+
+    @media(max-width:760px){
+      .prop-hero { grid-template-columns: 1fr; gap: 2.5rem; }
+      .prop-grid { grid-template-columns: 1fr; }
+      .flow-grid { grid-template-columns: 1fr; }
+      .includes-grid { grid-template-columns: 1fr 1fr; }
+      .include:nth-child(4n) { border-right: 1px solid var(--border); }
+      .include:nth-child(2n) { border-right: none; }
+      .legal-grid { grid-template-columns: 1fr 1fr; }
+      .legal-item:nth-child(3n) { border-right: 1px solid var(--border); }
+      .legal-item:nth-child(2n) { border-right: none; }
     }
-    .prop-cta h2 { margin-bottom: 0.75rem; }
-    .prop-cta p { color: var(--muted); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; }
-    .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.75rem 1.75rem; background: var(--blue); color: #fff; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: background 0.2s; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-    .btn:hover { background: #3B65E8; }
-    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--white); margin-left: 0.75rem; }
-    .btn-ghost:hover { background: var(--card); }
-
-    footer { padding: 2.5rem 1.5rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; max-width: 1000px; margin: 0 auto; }
-    .footer-logo { font-family: 'Syne', sans-serif; font-weight: 800; }
-    .footer-logo span { color: var(--blue); }
-    .footer-note { font-size: 0.78rem; color: var(--muted); }
-
-    @media(max-width:600px){
-      .prop-nav { padding: 1rem 1.25rem; }
-      .prop-hero { padding: 3rem 0 2rem; }
+    @media(max-width:500px){
+      .gate-box { padding: 2.5rem 1.5rem; margin: 1rem; }
+      .includes-grid { grid-template-columns: 1fr; }
+      .legal-grid { grid-template-columns: 1fr; }
+      .tl-item { grid-template-columns: 80px 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- PASSWORD GATE -->
+<!-- GATE -->
 <div id="gate">
   <div class="gate-box">
-    <div class="gate-lock">🔐</div>
-    <div class="gate-title">Proposta Privada</div>
-    <div class="gate-sub">Esta proposta é exclusiva e confidencial.<br>Introduza a palavra-passe para aceder.</div>
-    <input type="password" id="pw" class="gate-input" placeholder="••••••••••••" autocomplete="off">
-    <button class="gate-btn" onclick="unlock()">Aceder à Proposta →</button>
+    <div class="gate-eyebrow">Proposta Confidencial</div>
+    <h1 class="gate-title">Acesso Restrito</h1>
+    <p class="gate-sub">Esta proposta é exclusiva e preparada para si.<br>Introduza a palavra-passe para continuar.</p>
+    <input type="password" id="pw" class="gate-input" placeholder="· · · · · · · · · ·" autocomplete="off">
+    <button class="gate-btn" onclick="unlock()">Aceder à Proposta</button>
     <div class="gate-error" id="gate-error">Palavra-passe incorreta. Tente novamente.</div>
   </div>
 </div>
@@ -302,148 +306,97 @@
 <!-- PROPOSAL -->
 <div id="proposal">
 
-  <!-- NAV -->
   <nav class="prop-nav">
-    <a href="index.html" class="nav-logo">home<span>stay</span></a>
-    <div class="nav-meta">Proposta Confidencial · Abril 2026</div>
+    <div class="prop-nav-inner">
+      <a href="index.html" class="nav-logo">home<span>stay</span></a>
+      <div class="nav-conf">Proposta Confidencial · Abril 2026</div>
+    </div>
   </nav>
 
-  <div class="main">
+  <div class="container">
 
     <!-- HERO -->
     <div class="prop-hero">
-      <div class="prop-badge">🔒 Proposta Exclusiva</div>
-      <div class="prop-title">Gestão para <em>o seu imóvel.</em><br>Simples, eficiente, lucrativa.</div>
-      <p class="prop-intro">
-        Apresentamos a proposta para os dois apartamentos da sua família — com projeções reais de rentabilidade,
-        estrutura de custos transparente e comparação direta com a concorrência.
-        Sem comissões excessivas. Sem custos escondidos.
-      </p>
-      <div class="prop-summary-cards">
-        <div class="summary-card">
-          <div class="summary-card-label">Comissão de gestão</div>
-          <div class="summary-card-val blue">10%</div>
-          <div class="summary-card-sub">da receita líquida</div>
+      <div>
+        <div class="tag">Proposta exclusiva</div>
+        <h1>A rentabilidade<br><em>do seu imóvel.</em></h1>
+        <p class="prop-hero-lead">Apresentamos a análise completa para os dois apartamentos da sua família — com projeções reais, estrutura de custos transparente e comparação directa com a concorrência.</p>
+      </div>
+      <div class="hero-summary">
+        <div class="hs-item">
+          <div class="hs-label">Comissão de gestão</div>
+          <div class="hs-val green">10%</div>
+          <div class="hs-sub">da receita líquida</div>
         </div>
-        <div class="summary-card">
-          <div class="summary-card-label">Poupança vs concorrência</div>
-          <div class="summary-card-val green">+€4.200</div>
-          <div class="summary-card-sub">por ano (2 imóveis, 66% ocup.)</div>
+        <div class="hs-item">
+          <div class="hs-label">Mais vs concorrência/ano</div>
+          <div class="hs-val green">+€5.191</div>
+          <div class="hs-sub">2 imóveis · cenário 66%</div>
         </div>
-        <div class="summary-card">
-          <div class="summary-card-label">Check-in</div>
-          <div class="summary-card-val blue">100%</div>
-          <div class="summary-card-sub">automático · sem deslocações</div>
+        <div class="hs-item">
+          <div class="hs-label">Check-in</div>
+          <div class="hs-val">100%</div>
+          <div class="hs-sub">automático · zero deslocações</div>
         </div>
-        <div class="summary-card">
-          <div class="summary-card-label">Limpeza</div>
-          <div class="summary-card-val green">€0</div>
-          <div class="summary-card-sub">markup · ao custo real</div>
-        </div>
-        <div class="summary-card">
-          <div class="summary-card-label">Rentabilidade/ano</div>
-          <div class="summary-card-val green">€31.149</div>
-          <div class="summary-card-sub">2 imóveis · cenário 66%</div>
+        <div class="hs-item">
+          <div class="hs-label">Markup na limpeza</div>
+          <div class="hs-val amber">€0</div>
+          <div class="hs-sub">ao custo real, sem margem</div>
         </div>
       </div>
     </div>
 
-    <!-- OS 2 IMÓVEIS -->
-    <div class="section">
-      <div class="section-tag">Os imóveis</div>
-      <h2>Projeções de rentabilidade por imóvel</h2>
-      <p class="lead">Dados de mercado reais (2026). Cinco cenários de ocupação — do conservador ao otimista.</p>
+    <!-- PROJEÇÕES -->
+    <div class="psection">
+      <div class="tag">Os imóveis</div>
+      <h2 class="phead">Projeções de <em>rentabilidade.</em></h2>
+      <p class="plead">Cinco cenários de ocupação por imóvel. "Recebe" = receita bruta após IVA 6%, plataformas ~15% e comissão Homestay 10%.</p>
 
       <div class="prop-grid">
 
-        <!-- T0 PORTO -->
         <div class="prop-card">
-          <div class="prop-card-header">
+          <div class="prop-card-head">
             <div class="prop-card-type">T0 · Porto</div>
             <div class="prop-card-name">Travessa do Senhora da Boa Morte, 31</div>
-            <div class="prop-card-addr">Porto · 2 pessoas · Centro histórico</div>
+            <div class="prop-card-addr">Porto · Centro histórico · 2 pessoas</div>
           </div>
-          <div class="prop-card-divider"></div>
           <div class="prop-card-body">
-            <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.25rem 0.5rem;font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:0 0.5rem;margin-bottom:0.5rem;">
-              <span>Ocup.</span><span>Receita Bruta</span><span>Recebe</span>
+            <div class="scenario-header">
+              <span>Ocupação</span><span>Receita bruta</span><span>Proprietário recebe</span>
             </div>
-
-            <div class="scenario-row" style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.25rem 0.5rem;border-radius:8px;padding:0.65rem 0.5rem;">
-              <span class="scenario-occ">33%</span>
-              <span class="scenario-gross">€11.691/ano</span>
-              <span class="scenario-net">€8.312/ano</span>
+            <div class="scenario"><span class="sc-occ">33%</span><span class="sc-gross">€11.691/ano</span><span class="sc-net">€8.312/ano</span></div>
+            <div class="scenario"><span class="sc-occ">55%</span><span class="sc-gross">€18.249/ano</span><span class="sc-net">€12.975/ano</span></div>
+            <div class="scenario base">
+              <span class="sc-occ">66% <span class="sc-badge">base</span></span>
+              <span class="sc-gross">€21.935/ano</span>
+              <span class="sc-net">€15.596/ano</span>
             </div>
-            <div class="scenario-row" style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.25rem 0.5rem;border-radius:8px;padding:0.65rem 0.5rem;">
-              <span class="scenario-occ">55%</span>
-              <span class="scenario-gross">€18.249/ano</span>
-              <span class="scenario-net">€12.975/ano</span>
-            </div>
-            <div class="scenario-row highlight" style="display:grid;grid-template-columns:auto 1fr 1fr auto;gap:0.25rem 0.5rem;border-radius:8px;padding:0.65rem 0.75rem;margin-bottom:0.4rem;">
-              <span class="scenario-occ" style="color:var(--white);font-weight:700;">66%</span>
-              <span class="scenario-gross" style="color:var(--white);">€21.935/ano</span>
-              <span class="scenario-net good">€15.596/ano</span>
-              <span class="scenario-badge">base</span>
-            </div>
-            <div class="scenario-row" style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.25rem 0.5rem;border-radius:8px;padding:0.65rem 0.5rem;">
-              <span class="scenario-occ">72%</span>
-              <span class="scenario-gross">€23.485/ano</span>
-              <span class="scenario-net good">€16.698/ano</span>
-            </div>
-            <div class="scenario-row" style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.25rem 0.5rem;border-radius:8px;padding:0.65rem 0.5rem;">
-              <span class="scenario-occ">84%</span>
-              <span class="scenario-gross">€26.447/ano</span>
-              <span class="scenario-net good">€18.804/ano</span>
-            </div>
-            <div class="prop-card-footnote">
-              "Recebe" = após IVA 6% + OTA 15% + comissão Homestay 10%.<br>
-              Limpeza cobrada ao hóspede, sem custo adicional.
-            </div>
+            <div class="scenario"><span class="sc-occ">72%</span><span class="sc-gross">€23.485/ano</span><span class="sc-net">€16.698/ano</span></div>
+            <div class="scenario"><span class="sc-occ">84%</span><span class="sc-gross">€26.447/ano</span><span class="sc-net">€18.804/ano</span></div>
+            <div class="prop-card-footnote">Valores anuais. Limpeza cobrada ao hóspede separadamente — não deduzida aqui, custo neutro para o proprietário.</div>
           </div>
         </div>
 
-        <!-- T1 MATOSINHOS -->
         <div class="prop-card">
-          <div class="prop-card-header">
+          <div class="prop-card-head">
             <div class="prop-card-type">T1 · Matosinhos</div>
             <div class="prop-card-name">Rua Comendador Ferreira de Matos, 208</div>
-            <div class="prop-card-addr">Matosinhos · 2 pessoas · Perto do aeroporto e praia</div>
+            <div class="prop-card-addr">Matosinhos · Praia e aeroporto · 2 pessoas</div>
           </div>
-          <div class="prop-card-divider"></div>
           <div class="prop-card-body">
-            <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.25rem 0.5rem;font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:0 0.5rem;margin-bottom:0.5rem;">
-              <span>Ocup.</span><span>Receita Bruta</span><span>Recebe</span>
+            <div class="scenario-header">
+              <span>Ocupação</span><span>Receita bruta</span><span>Proprietário recebe</span>
             </div>
-            <div class="scenario-row" style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.25rem 0.5rem;border-radius:8px;padding:0.65rem 0.5rem;">
-              <span class="scenario-occ">33%</span>
-              <span class="scenario-gross">€11.437/ano</span>
-              <span class="scenario-net">€8.132/ano</span>
+            <div class="scenario"><span class="sc-occ">33%</span><span class="sc-gross">€11.437/ano</span><span class="sc-net">€8.132/ano</span></div>
+            <div class="scenario"><span class="sc-occ">55%</span><span class="sc-gross">€18.199/ano</span><span class="sc-net">€12.939/ano</span></div>
+            <div class="scenario base">
+              <span class="sc-occ">66% <span class="sc-badge">base</span></span>
+              <span class="sc-gross">€21.875/ano</span>
+              <span class="sc-net">€15.553/ano</span>
             </div>
-            <div class="scenario-row" style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.25rem 0.5rem;border-radius:8px;padding:0.65rem 0.5rem;">
-              <span class="scenario-occ">55%</span>
-              <span class="scenario-gross">€18.199/ano</span>
-              <span class="scenario-net">€12.939/ano</span>
-            </div>
-            <div class="scenario-row highlight" style="display:grid;grid-template-columns:auto 1fr 1fr auto;gap:0.25rem 0.5rem;border-radius:8px;padding:0.65rem 0.75rem;margin-bottom:0.4rem;">
-              <span class="scenario-occ" style="color:var(--white);font-weight:700;">66%</span>
-              <span class="scenario-gross" style="color:var(--white);">€21.875/ano</span>
-              <span class="scenario-net good">€15.553/ano</span>
-              <span class="scenario-badge">base</span>
-            </div>
-            <div class="scenario-row" style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.25rem 0.5rem;border-radius:8px;padding:0.65rem 0.5rem;">
-              <span class="scenario-occ">72%</span>
-              <span class="scenario-gross">€23.599/ano</span>
-              <span class="scenario-net good">€16.779/ano</span>
-            </div>
-            <div class="scenario-row" style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.25rem 0.5rem;border-radius:8px;padding:0.65rem 0.5rem;">
-              <span class="scenario-occ">84%</span>
-              <span class="scenario-gross">€26.859/ano</span>
-              <span class="scenario-net good">€19.097/ano</span>
-            </div>
-            <div class="prop-card-footnote">
-              "Recebe" = após IVA 6% + OTA 15% + comissão Homestay 10%.<br>
-              Limpeza cobrada ao hóspede, sem custo adicional.
-            </div>
+            <div class="scenario"><span class="sc-occ">72%</span><span class="sc-gross">€23.599/ano</span><span class="sc-net">€16.779/ano</span></div>
+            <div class="scenario"><span class="sc-occ">84%</span><span class="sc-gross">€26.859/ano</span><span class="sc-net">€19.097/ano</span></div>
+            <div class="prop-card-footnote">Valores anuais. Matosinhos tem sazonalidade marcada (pico verão). Época baixa complementada com longa duração.</div>
           </div>
         </div>
 
@@ -451,242 +404,252 @@
     </div>
 
     <!-- DETALHE FINANCEIRO -->
-    <div class="section">
-      <div class="section-tag">Transparência total</div>
-      <h2>Como se calcula a rentabilidade</h2>
-      <p class="lead">Para cada reserva, aplicamos a seguinte estrutura. Nada escondido, nada estimado.</p>
+    <div class="psection alt">
+      <div class="container">
+        <div class="tag">Transparência</div>
+        <h2 class="phead">Como se <em>calcula a rentabilidade.</em></h2>
+        <p class="plead">Nada estimado. Por cada reserva, aplicamos esta estrutura. O proprietário vê exatamente de onde vem cada euro.</p>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
-        <div>
-          <div style="font-size:0.8rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;">T0 Porto — Cenário 66% (mensal)</div>
-          <div class="flow">
+        <div class="flow-grid">
+          <div class="flow-card">
+            <div class="flow-card-title">T0 Porto — Cenário 66% (mensal)</div>
             <div class="flow-row"><span class="flow-label">Receita bruta (acomodação)</span><span class="flow-val">€1.828</span></div>
-            <div class="flow-row"><span class="flow-label">− IVA 6%</span><span class="flow-val sub">−€110</span></div>
-            <div class="flow-row"><span class="flow-label">− Comissão plataformas ~15%</span><span class="flow-val sub">−€274</span></div>
+            <div class="flow-row deduct"><span class="flow-label">− IVA 6%</span><span class="flow-val">−€110</span></div>
+            <div class="flow-row deduct"><span class="flow-label">− Comissão plataformas ~15%</span><span class="flow-val">−€274</span></div>
             <div class="flow-row"><span class="flow-label">Receita líquida disponível</span><span class="flow-val">€1.444</span></div>
-            <div class="flow-row"><span class="flow-label">− Comissão Homestay 10%</span><span class="flow-val sub">−€144</span></div>
-            <div class="flow-row" style="background:rgba(0,201,167,0.06);border-radius:8px;padding:0.75rem;margin-top:0.25rem;"><span class="flow-label" style="color:var(--white);font-weight:700;">= Recebe o proprietário</span><span class="flow-val result" style="color:var(--teal);">€1.300/mês</span></div>
+            <div class="flow-row deduct"><span class="flow-label">− Comissão Homestay 10%</span><span class="flow-val">−€144</span></div>
+            <div class="flow-row total"><span class="flow-label">Proprietário recebe</span><span class="flow-val">€1.300/mês</span></div>
           </div>
-        </div>
-        <div>
-          <div style="font-size:0.8rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;">T1 Matosinhos — Cenário 66% (mensal)</div>
-          <div class="flow">
+          <div class="flow-card">
+            <div class="flow-card-title">T1 Matosinhos — Cenário 66% (mensal)</div>
             <div class="flow-row"><span class="flow-label">Receita bruta (acomodação)</span><span class="flow-val">€1.823</span></div>
-            <div class="flow-row"><span class="flow-label">− IVA 6%</span><span class="flow-val sub">−€109</span></div>
-            <div class="flow-row"><span class="flow-label">− Comissão plataformas ~15%</span><span class="flow-val sub">−€273</span></div>
-            <div class="flow-row"><span class="flow-label">Receita líquida disponível</span><span class="flow-val">€1.441</span></div>
-            <div class="flow-row"><span class="flow-label">− Comissão Homestay 10%</span><span class="flow-val sub">−€144</span></div>
-            <div class="flow-row" style="background:rgba(0,201,167,0.06);border-radius:8px;padding:0.75rem;margin-top:0.25rem;"><span class="flow-label" style="color:var(--white);font-weight:700;">= Recebe o proprietário</span><span class="flow-val result" style="color:var(--teal);">€1.297/mês</span></div>
+            <div class="flow-row deduct"><span class="flow-label">− IVA 6%</span><span class="flow-val">−€109</span></div>
+            <div class="flow-row deduct"><span class="flow-label">− Comissão plataformas ~15%</span><span class="flow-val">−€274</span></div>
+            <div class="flow-row"><span class="flow-label">Receita líquida disponível</span><span class="flow-val">€1.440</span></div>
+            <div class="flow-row deduct"><span class="flow-label">− Comissão Homestay 10%</span><span class="flow-val">−€144</span></div>
+            <div class="flow-row total"><span class="flow-label">Proprietário recebe</span><span class="flow-val">€1.296/mês</span></div>
           </div>
         </div>
-      </div>
 
-      <div style="margin-top:1.5rem;padding:1.25rem 1.5rem;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:12px;font-size:0.85rem;color:#FCD34D;line-height:1.7;">
-        <strong>Nota sobre limpeza:</strong> A taxa de limpeza é cobrada diretamente ao hóspede como item separado na reserva Airbnb/Booking. O valor (tipicamente €40–60 por estadia) é pago à equipa de limpeza sem qualquer markup da Homestay. O proprietário não tem este custo — é neutro.
+        <div class="cleaning-note">
+          <strong>Nota sobre limpeza:</strong> A taxa de limpeza é cobrada diretamente ao hóspede como item separado na reserva Airbnb/Booking. O valor típico (€40–60 por limpeza, dependendo do apartamento) é pago à equipa de limpeza <strong>sem qualquer markup da Homestay</strong>. Este custo é neutro para o proprietário — não aparece nestes cálculos.
+        </div>
       </div>
     </div>
 
     <!-- COMPARAÇÃO -->
-    <div class="section">
-      <div class="section-tag">Comparação</div>
-      <h2>Nós vs a concorrência</h2>
-      <p class="lead">Comparação direta com a Liiiving — empresa com proposta para os mesmos imóveis. Dados reais 2026.</p>
+    <div class="psection">
+      <div class="tag">Comparação</div>
+      <h2 class="phead">Nós vs <em>a concorrência.</em></h2>
+      <p class="plead">Comparação directa com proposta Liiiving recebida para os mesmos imóveis. Dados reais 2026.</p>
 
-      <table class="vs-table">
+      <table class="vs">
         <thead>
           <tr>
             <th>Critério</th>
-            <th style="color:var(--teal);">Homestay</th>
+            <th class="ours">Homestay</th>
             <th>Liiiving</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>Comissão de gestão</td>
-            <td class="us">10% da receita líquida</td>
-            <td class="them">25% da receita líquida</td>
+            <td class="good">10% da receita líquida</td>
+            <td class="dim">25% da receita líquida</td>
           </tr>
           <tr class="highlight-row">
-            <td>T0 Porto — Recebe por ano (66%)</td>
-            <td class="us">€15.596/ano</td>
-            <td class="them">€12.997/ano</td>
+            <td>T0 Porto — recebe/ano (66%)</td>
+            <td class="good">€15.596/ano</td>
+            <td class="dim">€12.997/ano</td>
           </tr>
           <tr class="highlight-row">
-            <td>T1 Matosinhos — Recebe por ano (66%)</td>
-            <td class="us">€15.553/ano</td>
-            <td class="them">€12.961/ano</td>
+            <td>T1 Matosinhos — recebe/ano (66%)</td>
+            <td class="good">€15.553/ano</td>
+            <td class="dim">€12.961/ano</td>
           </tr>
-          <tr style="background:rgba(0,201,167,0.06);">
-            <td style="color:var(--teal);font-weight:700;">Poupança total (2 imóveis/ano)</td>
-            <td class="us" style="font-size:1.05rem;">+€5.191/ano</td>
-            <td class="them">—</td>
+          <tr style="background:var(--green-pale)">
+            <td style="color:var(--green);font-weight:600;">Ganho total (2 imóveis/ano)</td>
+            <td class="good" style="font-size:1.1rem;font-family:'Cormorant Garamond',serif;">+€5.191/ano</td>
+            <td class="dim">—</td>
           </tr>
           <tr>
             <td>Check-in</td>
-            <td class="us">100% automático (Nuki)</td>
-            <td class="them">Semi-automático</td>
+            <td class="good">100% automático (Nuki)</td>
+            <td class="dim">Semi-automático</td>
           </tr>
           <tr>
             <td>Markup na limpeza</td>
-            <td class="us">Zero — ao custo real</td>
-            <td class="them">Incluída na comissão</td>
+            <td class="good">Zero — ao custo real</td>
+            <td class="dim">Incluída na comissão</td>
           </tr>
           <tr>
             <td>Dashboard tempo real</td>
-            <td class="us">Sim — acesso permanente</td>
-            <td class="them">App própria</td>
+            <td class="good">Sim — acesso permanente</td>
+            <td class="dim">App própria</td>
           </tr>
           <tr>
             <td>Gestão legal (RNAL, SIBA/SEF)</td>
-            <td class="us">Incluída</td>
-            <td class="them">Incluída</td>
+            <td class="good">Incluída</td>
+            <td class="dim">Incluída</td>
           </tr>
           <tr>
             <td>Contrato</td>
-            <td class="us">Aviso prévio 30 dias</td>
-            <td class="them">Contrato anual</td>
+            <td class="good">Aviso prévio 30 dias</td>
+            <td class="dim">Contrato anual</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <!-- O QUE ESTÁ INCLUÍDO -->
-    <div class="section">
-      <div class="section-tag">Serviço</div>
-      <h2>O que está incluído</h2>
-      <p class="lead">Tudo o que precisa para ter o imóvel a gerar receita, sem esforço da sua parte.</p>
-      <div class="includes-grid">
-        <div class="include-item">
-          <div class="include-icon">🔐</div>
-          <div class="include-text"><h4>Acesso automático completo</h4><p>Instalação do sistema Nuki (fechadura + teclado + porta prédio). Cada reserva gera um código único que expira no check-out.</p></div>
-        </div>
-        <div class="include-item">
-          <div class="include-icon">📸</div>
-          <div class="include-text"><h4>Listing otimizado</h4><p>Coordenação de fotografia profissional, otimização de título e descrição, publicação no Airbnb e Booking.com.</p></div>
-        </div>
-        <div class="include-item">
-          <div class="include-icon">💰</div>
-          <div class="include-text"><h4>Pricing dinâmico</h4><p>Preços ajustados diariamente — eventos, sazonalidade, procura. Pode representar +20–30% de receita vs preço fixo.</p></div>
-        </div>
-        <div class="include-item">
-          <div class="include-icon">💬</div>
-          <div class="include-text"><h4>Suporte ao hóspede 24h</h4><p>Resposta garantida em menos de 10 minutos (horário ativo). Mensagens automáticas para pré-chegada, check-out e review.</p></div>
-        </div>
-        <div class="include-item">
-          <div class="include-icon">🧹</div>
-          <div class="include-text"><h4>Coordenação de limpeza</h4><p>Checklist padronizada, fotos pós-limpeza enviadas ao proprietário. Custo direto ao hóspede, sem markup nosso.</p></div>
-        </div>
-        <div class="include-item">
-          <div class="include-icon">⚖️</div>
-          <div class="include-text"><h4>Gestão legal completa</h4><p>RNAL, registo SIBA/SEF de hóspedes (3 dias úteis), documentação fiscal mensal, livro de reclamações eletrónico.</p></div>
-        </div>
-        <div class="include-item">
-          <div class="include-icon">📊</div>
-          <div class="include-text"><h4>Relatório mensal</h4><p>Ocupação, receita por noite, reviews, custos, comparação com mês anterior. Dashboard em tempo real sempre disponível.</p></div>
-        </div>
-        <div class="include-item">
-          <div class="include-icon">🔧</div>
-          <div class="include-text"><h4>Manutenção coordenada</h4><p>Parceiros técnicos locais para avarias. Diagnóstico remoto primeiro, intervenção física apenas quando necessário.</p></div>
+    <div class="psection alt">
+      <div class="container">
+        <div class="tag">Serviço</div>
+        <h2 class="phead">O que está <em>incluído.</em></h2>
+        <p class="plead">Tudo o que é necessário para o imóvel gerar receita sem qualquer esforço da sua parte.</p>
+        <div class="includes-grid">
+          <div class="include">
+            <div class="include-num">01</div>
+            <h4>Acesso automático</h4>
+            <p>Nuki Smart Lock + Keypad + Opener. Cada reserva gera um código único que expira no check-out.</p>
+          </div>
+          <div class="include">
+            <div class="include-num">02</div>
+            <h4>Listing optimizado</h4>
+            <p>Fotografia profissional, título e descrição, publicação no Airbnb e Booking.com.</p>
+          </div>
+          <div class="include">
+            <div class="include-num">03</div>
+            <h4>Pricing dinâmico</h4>
+            <p>Preços ajustados diariamente — eventos, sazonalidade, procura. +20–30% vs preço fixo.</p>
+          </div>
+          <div class="include">
+            <div class="include-num">04</div>
+            <h4>Suporte 24h</h4>
+            <p>Resposta em menos de 10 minutos. Mensagens automáticas para pré-chegada e check-out.</p>
+          </div>
+          <div class="include">
+            <div class="include-num">05</div>
+            <h4>Coordenação de limpeza</h4>
+            <p>Checklist padronizada, fotos pós-limpeza enviadas ao proprietário. Sem markup.</p>
+          </div>
+          <div class="include">
+            <div class="include-num">06</div>
+            <h4>Gestão legal</h4>
+            <p>RNAL, SIBA/SEF, IVA, livro de reclamações. Documentação pronta para o contabilista.</p>
+          </div>
+          <div class="include">
+            <div class="include-num">07</div>
+            <h4>Relatório mensal</h4>
+            <p>Ocupação, receita por noite, reviews, custos. Dashboard em tempo real sempre disponível.</p>
+          </div>
+          <div class="include">
+            <div class="include-num">08</div>
+            <h4>Manutenção</h4>
+            <p>Parceiros técnicos locais. Diagnóstico remoto primeiro, intervenção só quando necessário.</p>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- GESTÃO LEGAL -->
-    <div class="section">
-      <div class="section-tag">Legal</div>
-      <h2>Como gerimos a parte legal</h2>
-      <p class="lead">O proprietário não precisa de se preocupar com burocracia. Tratamos de tudo — com documentação completa para o contabilista.</p>
+    <div class="psection">
+      <div class="tag">Conformidade legal</div>
+      <h2 class="phead">Como gerimos <em>a parte legal.</em></h2>
+      <p class="plead">O proprietário não precisa de se preocupar com burocracia. Tratamos de tudo — com documentação completa para o seu contabilista.</p>
       <div class="legal-grid">
         <div class="legal-item">
-          <div class="tag">Registo</div>
+          <div class="legal-tag">Registo</div>
           <h4>RNAL</h4>
-          <p>Verificamos/obtemos o número de registo nacional de AL e comunicamos à Câmara Municipal.</p>
+          <p>Obtemos ou verificamos o registo nacional de AL e comunicamos à Câmara Municipal dentro do prazo legal.</p>
         </div>
         <div class="legal-item">
-          <div class="tag">Hóspedes</div>
+          <div class="legal-tag">Hóspedes</div>
           <h4>SIBA / SEF</h4>
-          <p>Recolha dos dados de identificação antes do check-in e submissão automática às autoridades em 3 dias úteis.</p>
+          <p>Recolha automática dos dados de identificação antes do check-in. Submissão às autoridades em 3 dias úteis.</p>
         </div>
         <div class="legal-item">
-          <div class="tag">Fiscal</div>
+          <div class="legal-tag">Fiscal</div>
           <h4>IVA &amp; IRS</h4>
-          <p>Cálculo do IVA 6% em cada relatório. Documentação completa para declaração de IRS Categoria B.</p>
+          <p>IVA 6% calculado em cada relatório. Documentação completa para declaração IRS Categoria B.</p>
         </div>
         <div class="legal-item">
-          <div class="tag">Segurança</div>
+          <div class="legal-tag">Segurança</div>
           <h4>Conformidade física</h4>
-          <p>Verificação do extintor, kit de primeiros socorros e placa AL em cada visita de limpeza.</p>
+          <p>Extintor, kit de primeiros socorros e placa AL verificados em cada visita de limpeza.</p>
         </div>
         <div class="legal-item">
-          <div class="tag">Reclamações</div>
+          <div class="legal-tag">Reclamações</div>
           <h4>Livro eletrónico</h4>
-          <p>Registo e gestão do livro de reclamações eletrónico (livroreclamacoes.pt). QR code visível no imóvel.</p>
+          <p>Registo e gestão do livro de reclamações eletrónico. QR code visível no imóvel.</p>
         </div>
         <div class="legal-item">
-          <div class="tag">Proteção</div>
+          <div class="legal-tag">Proteção</div>
           <h4>AirCover + Seguro</h4>
-          <p>Danos reportados no prazo legal (72h). Acompanhamento de processos de compensação com a plataforma.</p>
+          <p>Danos reportados no prazo de 72h. Acompanhamento dos processos de compensação.</p>
         </div>
       </div>
     </div>
 
     <!-- TIMELINE -->
-    <div class="section">
-      <div class="section-tag">Arranque</div>
-      <h2>Da assinatura à primeira reserva</h2>
-      <p class="lead">12 dias do contrato ao imóvel operacional e a gerar receita.</p>
-      <div class="timeline">
-        <div class="timeline-item">
-          <div class="timeline-day">Dia 1</div>
-          <div class="timeline-title">Contrato assinado</div>
-          <div class="timeline-desc">Definição das condições, datas e acesso ao imóvel.</div>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-day">Dias 2–4</div>
-          <div class="timeline-title">Instalação do sistema de acesso</div>
-          <div class="timeline-desc">Nuki Smart Lock + Keypad + Opener na porta do prédio. Testes de funcionamento completos.</div>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-day">Dia 5</div>
-          <div class="timeline-title">Sessão fotográfica</div>
-          <div class="timeline-desc">Coordenação com fotógrafo profissional. Imóvel preparado conforme briefing de staging.</div>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-day">Dias 6–8</div>
-          <div class="timeline-title">Criação e publicação dos listings</div>
-          <div class="timeline-desc">Airbnb + Booking.com. Otimização de título, comodidades, house rules e preço de arranque.</div>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-day">Dia 9</div>
-          <div class="timeline-title">Configuração de automações</div>
-          <div class="timeline-desc">PMS + pricing dinâmico + mensagens automáticas + integração Nuki-PMS para geração de códigos.</div>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-day">Dia 10</div>
-          <div class="timeline-title">Gestão legal</div>
-          <div class="timeline-desc">Verificação RNAL, conta SEF/AIMA para SIBA, livro de reclamações eletrónico ativado.</div>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-day">Dia 12</div>
-          <div class="timeline-title">✅ Imóvel operacional</div>
-          <div class="timeline-desc">Primeiro código de acesso testado. Listing ativo. Primeiras reservas a chegar.</div>
+    <div class="psection alt">
+      <div class="container">
+        <div class="tag">Arranque</div>
+        <h2 class="phead">Da assinatura à <em>primeira reserva.</em></h2>
+        <p class="plead">12 dias do contrato ao imóvel operacional.</p>
+        <div class="tl">
+          <div class="tl-item">
+            <div class="tl-day"><span>Dia 1</span></div>
+            <div class="tl-body"><div class="tl-title">Contrato assinado</div><div class="tl-desc">Definição das condições, datas e acesso ao imóvel.</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-day"><span>Dias 2–4</span></div>
+            <div class="tl-body"><div class="tl-title">Instalação do sistema de acesso</div><div class="tl-desc">Nuki Smart Lock + Keypad + Opener na porta do prédio. Testes completos de funcionamento.</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-day"><span>Dia 5</span></div>
+            <div class="tl-body"><div class="tl-title">Sessão fotográfica profissional</div><div class="tl-desc">Coordenação com fotógrafo. Staging preparado conforme briefing de qualidade.</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-day"><span>Dias 6–8</span></div>
+            <div class="tl-body"><div class="tl-title">Criação e publicação dos listings</div><div class="tl-desc">Airbnb + Booking.com. Título, comodidades, regras e preço de arranque optimizados.</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-day"><span>Dia 9</span></div>
+            <div class="tl-body"><div class="tl-title">Automações configuradas</div><div class="tl-desc">PMS + pricing dinâmico + mensagens automáticas + integração Nuki para geração de códigos.</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-day"><span>Dia 10</span></div>
+            <div class="tl-body"><div class="tl-title">Gestão legal activa</div><div class="tl-desc">RNAL verificado, conta SEF/AIMA configurada, livro de reclamações eletrónico ativado.</div></div>
+          </div>
+          <div class="tl-item tl-done">
+            <div class="tl-day"><span>Dia 12</span></div>
+            <div class="tl-body"><div class="tl-title">Imóvel operacional ✓</div><div class="tl-desc">Primeiro código testado. Listing activo. Primeiras reservas a chegar.</div></div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- CTA -->
     <div class="prop-cta">
+      <div class="tag">Próximos passos</div>
       <h2>Prontos para avançar?</h2>
-      <p>Enviamos o contrato e marcamos a instalação. Em 12 dias o imóvel está operacional.</p>
-      <a href="mailto:hello@homestay.pt" class="btn">Aceitar a Proposta →</a>
-      <a href="index.html" class="btn btn-ghost">Voltar ao site</a>
+      <p>Enviamos o contrato e marcamos a instalação. Em 12 dias o imóvel está operacional e a gerar receita.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="mailto:hello@homestay.pt" class="btn btn-primary">Aceitar a Proposta →</a>
+        <a href="index.html" class="btn btn-outline">Voltar ao site</a>
+      </div>
     </div>
 
   </div>
 
   <footer>
-    <div class="footer-logo">home<span>stay</span></div>
-    <div class="footer-note">Proposta confidencial · Válida por 30 dias · Abril 2026</div>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">home<span>stay</span></div>
+        <div class="footer-note">Proposta confidencial · Válida 30 dias · Abril 2026</div>
+      </div>
+    </div>
   </footer>
 
 </div>
@@ -695,23 +658,19 @@
   function unlock() {
     const pw = document.getElementById('pw').value;
     const err = document.getElementById('gate-error');
-    const input = document.getElementById('pw');
+    const inp = document.getElementById('pw');
     if (pw === 'homestay123') {
       document.getElementById('gate').style.display = 'none';
       document.getElementById('proposal').style.display = 'block';
-      document.body.style.overflow = 'auto';
+      document.body.classList.add('unlocked');
     } else {
-      input.classList.add('error');
+      inp.classList.add('error');
       err.style.display = 'block';
-      setTimeout(() => input.classList.remove('error'), 500);
-      input.value = '';
-      input.focus();
+      setTimeout(() => inp.classList.remove('error'), 500);
+      inp.value = ''; inp.focus();
     }
   }
-  document.getElementById('pw').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') unlock();
-  });
-  document.body.style.overflow = 'hidden';
+  document.getElementById('pw').addEventListener('keydown', e => { if(e.key === 'Enter') unlock(); });
 </script>
 
 </body>
