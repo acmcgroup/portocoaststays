@@ -10,7 +10,15 @@ Open `website/index.html` in a browser, or serve the folder:
 cd website && npx --yes serve .
 ```
 
-## Deploy (GitHub Pages)
+## Deploy
+
+### Netlify
+
+The repo keeps HTML under **`website/`**. This project includes [`netlify.toml`](netlify.toml) with `publish = "website"` so the site root is correct. Connect the repo and deploy — **do not** set the publish directory to `/` in the UI if it overrides the file (the TOML should win).
+
+If you still see **404**, in Netlify: **Site settings → Build & deploy → Build settings → Publish directory** → set to `website` (or leave empty so `netlify.toml` applies).
+
+### GitHub Pages
 
 Point Pages to the **`/website`** folder on branch `main`, or use a workflow that publishes `website/` as the site root.
 

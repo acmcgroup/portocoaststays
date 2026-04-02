@@ -1,0 +1,11 @@
+# Netlify: static site lives in /website (not repo root)
+[build]
+  publish = "website"
+  # No build step — plain HTML/CSS
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
