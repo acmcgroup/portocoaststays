@@ -1,4 +1,4 @@
-# Homestay - Website
+# Porto Coast Stays - Website
 
 Static site: landing page + password-protected proposal (`proposta.html`).
 

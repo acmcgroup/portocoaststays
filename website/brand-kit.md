@@ -1,4 +1,4 @@
-# Homestay - Brand Kit
+# Porto Coast Stays - Brand Kit
 
 Identidade visual completa. Todos os ficheiros do website usam este sistema.
 
@@ -6,15 +6,15 @@ Identidade visual completa. Todos os ficheiros do website usam este sistema.
 
 ## Filosofia de marca
 
-**Clássico. Editorial. Confiança.**
+**Premium. Coastal. Confiança.**
 
-A Homestay não é uma startup de néon. É uma empresa de gestão imobiliária que usa tecnologia invisível para fazer o trabalho pesado. O visual deve transmitir:
+Porto Coast Stays não é uma plataforma genérica. É uma gestora de alojamento local focada na faixa costeira do Porto — Matosinhos, Foz, Gaia — que entrega experiências premium a hóspedes internacionais e resultados reais a proprietários. O visual deve transmitir:
 
-- Solidez e confiança (como uma consultora premium)
-- Clareza e transparência (como um relatório financeiro limpo)
-- Modernidade discreta (a tecnologia está implícita, não gritada)
+- Posicionamento premium e diferenciador (costa vs. centro genérico)
+- Confiança e transparência (como uma gestora de patrimônio séria)
+- Leveza editorial (a experiência de estadia está implícita, não gritada)
 
-Referência visual: **HomeLovers, Engel & Völkers, Kinfolk magazine**
+Referência visual: **Engel & Völkers, Kinfolk magazine, boutique hotels costeiros**
 
 ---
 
