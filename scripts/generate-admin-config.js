@@ -20,7 +20,18 @@ const SUPABASE_URL  = process.env.SUPABASE_URL       || process.env.NEXT_PUBLIC_
 const ANON_KEY      = process.env.SUPABASE_ANON_KEY  || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const BUCKET        = process.env.STORAGE_BUCKET      || 'portocoaststays-media';
 
+const outPath = path.join(__dirname, '..', 'website', 'admin', 'config.js');
+
 if (!SUPABASE_URL || !ANON_KEY) {
+  const examplePath = path.join(__dirname, '..', 'website', 'admin', 'config.example.js');
+  if (fs.existsSync(examplePath)) {
+    fs.copyFileSync(examplePath, outPath);
+    console.warn(
+      '[generate-admin-config] SUPABASE_URL / SUPABASE_ANON_KEY unset — copied config.example.js. ' +
+        'Set those env vars in Netlify (Site settings → Environment variables) for production.'
+    );
+    process.exit(0);
+  }
   console.error('[generate-admin-config] ERROR: SUPABASE_URL and SUPABASE_ANON_KEY must be set.');
   process.exit(1);
 }
@@ -33,6 +44,5 @@ window.ADMIN_CONFIG = {
 };
 `;
 
-const outPath = path.join(__dirname, '..', 'website', 'admin', 'config.js');
 fs.writeFileSync(outPath, config, 'utf8');
 console.log('[generate-admin-config] Written to', outPath);

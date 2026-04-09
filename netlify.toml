@@ -75,12 +75,6 @@
   to    = "/admin/company-tasks.html"
   status = 200
 
-# Netlify function proxy (no trailing slash needed)
-[[redirects]]
-  from  = "/.netlify/functions/*"
-  to    = "/.netlify/functions/:splat"
-  status = 200
-
 # ── Headers ───────────────────────────────────────────────────────────────────
 [[headers]]
   for = "/admin/*"
