@@ -1,0 +1,20 @@
+---
+description: Places API (New) Text Search — contratos oficiais ao editar o scraper de fornecedores
+globs: "**/fornecedores/**/*.py"
+alwaysApply: false
+---
+
+# Google Places API (New) — Text Search
+
+Fonte de verdade: [Text Search (New)](https://developers.google.com/maps/documentation/places/web-service/text-search) e [REST searchText](https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places/searchText).
+
+## Regras que o código deve respeitar
+
+- **Paginação**: no pedido com `pageToken`, repetir os mesmos parâmetros que no primeiro pedido (exceto `pageSize` / `maxResultCount` / `pageToken`). Não enviar só `{ "pageToken": "..." }`.
+- **Field mask**: incluir `nextPageToken` no `X-Goog-FieldMask` se precisares do token na resposta.
+- **Área geográfica**: `locationBias` aceita círculo ou retângulo; `locationRestriction` no schema REST só **retângulo** (viewport). Não uses círculo em `locationRestriction` — usa `locationBias` + filtro local, ou retângulo que envolva a zona.
+- **rankPreference**: `DISTANCE` ordena por distância; para queries não categóricas a doc recomenda deixar por omissão — avaliar caso a caso.
+
+## Indexação no Cursor
+
+Em **Cursor Settings → Indexing / Docs**, adiciona a documentação oficial acima como fonte para o modelo alinhar com a API atual (evita confundir com Places API legada ou com “scraping” da UI do Maps).

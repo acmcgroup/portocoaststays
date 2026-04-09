@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Media — Porto Coast Stays Admin</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="admin-wrapper">
+  <div id="sidebar-mount"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-heading"><h1>Media</h1></div>
+      <div class="topbar-actions">
+        <label class="btn btn-accent" style="cursor:pointer">
+          ⬆ Carregar imagem
+          <input id="file-upload" type="file" accept="image/*" multiple style="display:none"/>
+        </label>
+      </div>
+    </div>
+    <div class="content-area">
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-val" id="stat-total">—</div><div class="stat-label">Imagens</div></div>
+      </div>
+      <div id="upload-progress" style="display:none" class="card">
+        <div class="card-body">
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+          <div class="progress-label" id="progress-label">A carregar…</div>
+        </div>
+      </div>
+      <div id="media-detail" style="display:none" class="card">
+        <div class="card-header">
+          <h2>Detalhe da imagem</h2>
+          <button class="btn btn-secondary btn-sm" id="close-detail">Fechar</button>
+        </div>
+        <div class="card-body" style="display:flex;gap:20px;align-items:flex-start">
+          <img id="detail-img" style="max-height:200px;border-radius:var(--admin-radius)" alt=""/>
+          <div style="flex:1">
+            <div class="field-group" style="margin-bottom:12px">
+              <label>URL pública</label>
+              <div style="display:flex;gap:8px">
+                <input id="detail-url" type="text" readonly style="flex:1;font-size:.8rem;background:var(--admin-surface2)"/>
+                <button class="btn btn-secondary btn-sm" id="btn-copy-url">Copiar</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-danger btn-sm" id="btn-delete-asset">Apagar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="media-grid" id="media-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+<script src="sidebar.js"></script>
+<script>
+(async () => {
+  'use strict';
+  const session = await initSidebar('media', true);
+  if (!session) return;
+
+  let currentAsset = null;
+
+  async function carregarMedia() {
+    const grid = document.getElementById('media-grid');
+    try {
+      const items = await AdminPortal.listarMedia({ limite: 100 });
+      document.getElementById('stat-total').textContent = items.length;
+      if (!items.length) { grid.innerHTML = '<p style="color:var(--admin-text-muted)">Sem imagens ainda.</p>'; return; }
+      grid.innerHTML = items.map(m => `
+        <div class="media-item" data-id="${m.id}" data-url="${AdminPortal.escapeHtml(m.public_url)}" data-path="${AdminPortal.escapeHtml(m.storage_path)}">
+          <img src="${AdminPortal.escapeHtml(m.public_url)}" alt="${AdminPortal.escapeHtml(m.alt_text)}" loading="lazy"/>
+          <div class="media-item-info"><div class="media-item-name">${AdminPortal.escapeHtml(m.filename)}</div></div>
+        </div>`).join('');
+      grid.querySelectorAll('.media-item').forEach(el => {
+        el.addEventListener('click', () => {
+          currentAsset = { id: el.dataset.id, url: el.dataset.url, path: el.dataset.path };
+          const det = document.getElementById('media-detail');
+          document.getElementById('detail-img').src = currentAsset.url;
+          document.getElementById('detail-url').value = currentAsset.url;
+          det.style.display = '';
+          det.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+    } catch(e) { AdminPortal.toast('Erro: ' + e.message, 'error'); }
+  }
+
+  document.getElementById('close-detail').addEventListener('click', () => { document.getElementById('media-detail').style.display = 'none'; });
+  document.getElementById('btn-copy-url').addEventListener('click', () => {
+    if (!currentAsset) return;
+    navigator.clipboard.writeText(currentAsset.url).then(() => AdminPortal.toast('URL copiada!', 'success'));
+  });
+  document.getElementById('btn-delete-asset').addEventListener('click', async () => {
+    if (!currentAsset) return;
+    if (!confirm('Apagar esta imagem? Esta acção é irreversível.')) return;
+    try {
+      await AdminPortal.apagarMedia(currentAsset.path, currentAsset.id);
+      document.getElementById('media-detail').style.display = 'none';
+      currentAsset = null;
+      AdminPortal.toast('Imagem apagada', 'info');
+      await carregarMedia();
+    } catch(e) { AdminPortal.toast(e.message, 'error'); }
+  });
+
+  document.getElementById('file-upload').addEventListener('change', async (e) => {
+    const files = [...e.target.files];
+    if (!files.length) return;
+    const prog = document.getElementById('upload-progress');
+    const fill = document.getElementById('progress-fill');
+    const label = document.getElementById('progress-label');
+    prog.style.display = 'block';
+    let done = 0;
+    for (const file of files) {
+      label.textContent = `${file.name}…`;
+      try {
+        await AdminPortal.uploadMedia(file);
+        done++;
+        fill.style.width = Math.round((done / files.length) * 100) + '%';
+      } catch(err) { AdminPortal.toast('Erro: ' + err.message, 'error'); }
+    }
+    prog.style.display = 'none';
+    fill.style.width = '0%';
+    AdminPortal.toast(`${done} imagem(ns) carregada(s)!`, 'success');
+    e.target.value = '';
+    await carregarMedia();
+  });
+
+  await carregarMedia();
+})();
+</script>
+</body>
+</html>

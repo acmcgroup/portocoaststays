@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Editor de Post — Porto Coast Stays Admin</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="admin.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css"/>
+</head>
+<body>
+<div class="admin-wrapper" id="editor-root">
+  <div id="sidebar-mount"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-heading">
+        <h1 id="page-title">Novo Post</h1>
+        <span id="autosave-status" style="font-size:.76rem;color:var(--admin-text-muted);margin-left:12px"></span>
+      </div>
+      <div class="topbar-actions">
+        <a href="/admin/posts" class="btn btn-secondary">← Voltar</a>
+        <span id="post-status-badge"></span>
+      </div>
+    </div>
+
+    <div class="content-area content-area--editor">
+      <form id="post-form" novalidate>
+        <div id="editor-pending-banner" class="alert alert-warning" style="display:none">
+          Este post foi alterado após a última publicação. Use «Sync Site» para atualizar.
+        </div>
+        <div class="editor-workspace">
+
+          <!-- Meta col -->
+          <div class="editor-meta-col">
+            <div class="card">
+              <div class="card-header"><h2>Campos comuns</h2></div>
+              <div class="card-body">
+                <div class="fields-row">
+                  <div class="field-group">
+                    <label for="post-kind">Tipo</label>
+                    <select id="post-kind">
+                      <option value="article">Artigo</option>
+                      <option value="report">Relatório</option>
+                      <option value="case_study">Caso de Estudo</option>
+                    </select>
+                  </div>
+                  <div class="field-group">
+                    <label for="published-date">Data publicação</label>
+                    <input id="published-date" type="date"/>
+                  </div>
+                </div>
+                <div class="fields-row">
+                  <div class="field-group">
+                    <label for="author-name">Autor</label>
+                    <input id="author-name" value="Porto Coast Stays" type="text"/>
+                  </div>
+                </div>
+                <div class="fields-row">
+                  <div class="field-group">
+                    <label for="featured-image">URL imagem de capa</label>
+                    <input id="featured-image" placeholder="https://…" type="text"/>
+                  </div>
+                  <div class="field-group">
+                    <label for="featured-alt">Alt da imagem</label>
+                    <input id="featured-alt" placeholder="Descrição" type="text"/>
+                  </div>
+                </div>
+                <div class="fields-row">
+                  <div class="field-group">
+                    <label for="featured-overlay-color">Cor overlay</label>
+                    <input type="color" id="featured-overlay-color" value="#001D2E" style="height:36px;width:60px;padding:2px;border:1px solid var(--admin-border);border-radius:var(--admin-radius);cursor:pointer;background:none"/>
+                  </div>
+                  <div class="field-group">
+                    <label for="featured-overlay-opacity">Intensidade: <span id="ov-val">60</span>%</label>
+                    <input type="range" id="featured-overlay-opacity" min="0" max="100" value="60" style="width:100%;accent-color:var(--admin-primary)"/>
+                  </div>
+                </div>
+                <div id="cover-preview-wrap" class="cover-preview-wrap" style="display:none;margin-top:10px">
+                  <p style="font-size:.76rem;color:var(--admin-text-muted);margin-bottom:6px">Arrastar para reposicionar</p>
+                  <div id="cover-drag-zone" class="cover-drag-zone">
+                    <img id="cover-drag-img" alt="" draggable="false"/>
+                    <div id="cover-overlay-preview" class="cover-overlay-preview"></div>
+                    <div class="cover-drag-hint">Arraste para reposicionar</div>
+                  </div>
+                  <input type="hidden" id="featured-image-position" value="50% 50%"/>
+                </div>
+              </div>
+            </div>
+
+            <!-- Per language -->
+            <div class="card">
+              <div class="card-header" style="flex-direction:column;align-items:flex-start;gap:10px">
+                <h2>Por idioma</h2>
+                <div class="tabs-bar" id="lang-tabs" style="margin:0;width:100%">
+                  <button type="button" class="tab-btn" data-tab="pt">PT</button>
+                  <button type="button" class="tab-btn" data-tab="en">EN</button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="tab-panel" data-panel="pt">
+                  <div class="field-group" style="margin-bottom:8px"><input id="slug-pt" placeholder="slug-pt (URL)" type="text"/></div>
+                  <div class="field-group" style="margin-bottom:4px"><input id="pt-title" placeholder="Título PT (máx 60)" type="text"/><div class="char-counter" id="cc-pt-title"></div></div>
+                  <div class="field-group" style="margin-bottom:4px"><input id="pt-desc" placeholder="Meta descrição PT (máx 160)" type="text"/><div class="char-counter" id="cc-pt-desc"></div></div>
+                  <div class="field-group"><select id="pt-service"><option value="/">Página relacionada (opcional)</option><option value="/blog/">Blog</option><option value="/contacto/">Contacto</option></select></div>
+                </div>
+                <div class="tab-panel" data-panel="en">
+                  <div class="field-group" style="margin-bottom:8px"><input id="slug-en" placeholder="slug-en (URL)" type="text"/></div>
+                  <div class="field-group" style="margin-bottom:4px"><input id="en-title" placeholder="Title EN (max 60)" type="text"/><div class="char-counter" id="cc-en-title"></div></div>
+                  <div class="field-group" style="margin-bottom:4px"><input id="en-desc" placeholder="Meta description EN (max 160)" type="text"/><div class="char-counter" id="cc-en-desc"></div></div>
+                  <div class="field-group"><select id="en-service"><option value="/">Related page (optional)</option><option value="/blog/">Blog</option><option value="/contact/">Contact</option></select></div>
+                </div>
+              </div>
+            </div>
+
+            <div id="validation-errors" class="alert alert-danger" style="display:none"></div>
+          </div>
+
+          <!-- Quill col -->
+          <div class="editor-quill-col">
+            <div class="tabs-bar" id="content-lang-tabs">
+              <button type="button" class="tab-btn" data-tab="pt">Conteúdo PT</button>
+              <button type="button" class="tab-btn" data-tab="en">Conteúdo EN</button>
+            </div>
+            <div class="tab-panel" data-panel="pt">
+              <div class="seo-preview" id="seo-pt">
+                <div class="seo-title" id="seo-title-pt">Título aparece aqui</div>
+                <div class="seo-url" id="seo-url-pt">https://portocoaststays.com/blog/slug/</div>
+                <div class="seo-desc" id="seo-desc-pt">Descrição aparece aqui</div>
+              </div>
+              <div id="quill-pt"></div>
+            </div>
+            <div class="tab-panel" data-panel="en">
+              <div class="seo-preview" id="seo-en">
+                <div class="seo-title" id="seo-title-en">Title appears here</div>
+                <div class="seo-url" id="seo-url-en">https://portocoaststays.com/en/blog/slug/</div>
+                <div class="seo-desc" id="seo-desc-en">Description appears here</div>
+              </div>
+              <div id="quill-en"></div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="editor-actions" id="editor-actions">
+      <span id="current-post-id" style="flex:1;font-size:.76rem;color:var(--admin-text-muted)"></span>
+      <button class="btn btn-secondary" id="btn-preview" type="button" style="display:none">👁 Preview</button>
+      <button class="btn btn-secondary" id="btn-save-draft" type="button">💾 Guardar rascunho</button>
+      <button class="btn btn-accent"    id="btn-publish"    type="button">🚀 Publicar</button>
+      <button class="btn btn-accent"    id="btn-sync-site"  type="button" style="display:none">🌐 Sync Site</button>
+      <button class="btn btn-secondary" id="btn-unpublish"  type="button" style="display:none">⏸ Despublicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Media modal -->
+<div id="media-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--admin-surface);border-radius:var(--admin-radius-lg);width:90%;max-width:760px;max-height:80vh;overflow:auto;padding:24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <h2 style="font-size:1rem">Escolher imagem</h2>
+      <button class="btn btn-secondary btn-sm" id="close-media-modal">Fechar</button>
+    </div>
+    <label class="btn btn-accent" style="margin-bottom:16px;cursor:pointer">
+      ⬆ Carregar imagem
+      <input type="file" id="media-upload" accept="image/*" style="display:none"/>
+    </label>
+    <div class="media-grid" id="media-grid-modal"><p style="color:var(--admin-text-muted)">A carregar…</p></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+<script src="sidebar.js"></script>
+<script>
+(async () => {
+  'use strict';
+  const session = await initSidebar('editor', true);
+  if (!session) return;
+
+  const QUILL_TOOLBAR = [[{ header: [2, 3, false] }],['bold','italic','underline','strike'],[{ list: 'ordered' },{ list: 'bullet' }],['blockquote'],['link','image'],['clean']];
+  const quillPt = new Quill('#quill-pt', { theme: 'snow', modules: { toolbar: QUILL_TOOLBAR } });
+  const quillEn = new Quill('#quill-en', { theme: 'snow', modules: { toolbar: QUILL_TOOLBAR } });
+  let activeQuill = null;
+
+  function openMediaModal() {
+    const modal = document.getElementById('media-modal');
+    modal.style.display = 'flex';
+    loadMediaGrid();
+  }
+
+  async function loadMediaGrid() {
+    const grid = document.getElementById('media-grid-modal');
+    try {
+      const items = await AdminPortal.listarMedia({ limite: 60 });
+      if (!items.length) { grid.innerHTML = '<p style="color:var(--admin-text-muted)">Sem imagens</p>'; return; }
+      grid.innerHTML = items.map(m => `
+        <div class="media-item" data-url="${AdminPortal.escapeHtml(m.public_url)}">
+          <img src="${AdminPortal.escapeHtml(m.public_url)}" alt="${AdminPortal.escapeHtml(m.alt_text)}" loading="lazy"/>
+          <div class="media-item-info"><div class="media-item-name">${AdminPortal.escapeHtml(m.filename)}</div></div>
+        </div>`).join('');
+      grid.querySelectorAll('.media-item').forEach(el => {
+        el.addEventListener('click', () => {
+          if (activeQuill) {
+            const range = activeQuill.getSelection(true);
+            activeQuill.insertEmbed(range.index, 'image', el.dataset.url);
+          }
+          document.getElementById('media-modal').style.display = 'none';
+        });
+      });
+    } catch(e) { grid.innerHTML = `<p style="color:var(--admin-danger)">${e.message}</p>`; }
+  }
+
+  document.getElementById('close-media-modal').addEventListener('click', () => {
+    document.getElementById('media-modal').style.display = 'none';
+  });
+
+  document.getElementById('media-upload').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const url = await AdminPortal.uploadMedia(file);
+      if (activeQuill) {
+        const range = activeQuill.getSelection(true);
+        activeQuill.insertEmbed(range.index, 'image', url);
+      }
+      document.getElementById('media-modal').style.display = 'none';
+      AdminPortal.toast('Imagem carregada!', 'success');
+    } catch(e) { AdminPortal.toast('Erro ao carregar: ' + e.message, 'error'); }
+    e.target.value = '';
+  });
+
+  quillPt.getModule('toolbar').addHandler('image', () => { activeQuill = quillPt; openMediaModal(); });
+  quillEn.getModule('toolbar').addHandler('image', () => { activeQuill = quillEn; openMediaModal(); });
+
+  AdminPortal.initTabs(document.getElementById('editor-root'));
+  AdminPortal.wireCharCounter(document.getElementById('pt-title'), document.getElementById('cc-pt-title'), 60);
+  AdminPortal.wireCharCounter(document.getElementById('pt-desc'),  document.getElementById('cc-pt-desc'),  160);
+  AdminPortal.wireCharCounter(document.getElementById('en-title'), document.getElementById('cc-en-title'), 60);
+  AdminPortal.wireCharCounter(document.getElementById('en-desc'),  document.getElementById('cc-en-desc'),  160);
+
+  function refreshPreviews() {
+    const slugPt = document.getElementById('slug-pt').value.trim();
+    const slugEn = document.getElementById('slug-en').value.trim();
+    document.getElementById('seo-title-pt').textContent = document.getElementById('pt-title').value || '(sem título)';
+    document.getElementById('seo-url-pt').textContent   = `https://portocoaststays.com/blog/${slugPt ? slugPt + '/' : ''}`;
+    document.getElementById('seo-desc-pt').textContent  = document.getElementById('pt-desc').value || '(sem descrição)';
+    document.getElementById('seo-title-en').textContent = document.getElementById('en-title').value || '(no title)';
+    document.getElementById('seo-url-en').textContent   = `https://portocoaststays.com/en/blog/${slugEn ? slugEn + '/' : ''}`;
+    document.getElementById('seo-desc-en').textContent  = document.getElementById('en-desc').value || '(no description)';
+  }
+
+  // Cover drag
+  const coverWrap      = document.getElementById('cover-preview-wrap');
+  const coverImg       = document.getElementById('cover-drag-img');
+  const coverPosInput  = document.getElementById('featured-image-position');
+  const overlayEl      = document.getElementById('cover-overlay-preview');
+  const overlayColorEl = document.getElementById('featured-overlay-color');
+  const overlayOpEl    = document.getElementById('featured-overlay-opacity');
+  const overlayValEl   = document.getElementById('ov-val');
+  const coverZone      = document.getElementById('cover-drag-zone');
+  let coverDrag = null;
+
+  function updateOverlay() {
+    const opacity = parseInt(overlayOpEl.value, 10) / 100;
+    overlayEl.style.background = overlayColorEl.value;
+    overlayEl.style.opacity = String(opacity);
+  }
+
+  function refreshCover() {
+    const url = document.getElementById('featured-image').value.trim();
+    if (url) { coverImg.src = url; coverWrap.style.display = 'block'; updateOverlay(); }
+    else { coverWrap.style.display = 'none'; }
+  }
+
+  overlayOpEl.addEventListener('input', () => { overlayValEl.textContent = overlayOpEl.value; updateOverlay(); markDirty(); });
+  overlayColorEl.addEventListener('input', () => { updateOverlay(); markDirty(); });
+  document.getElementById('featured-image').addEventListener('input', () => { refreshCover(); refreshPreviews(); markDirty(); });
+
+  coverZone.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    const p = (coverPosInput.value || '50% 50%').match(/([\d.]+)%\s+([\d.]+)%/);
+    coverDrag = { lastX: e.clientX, lastY: e.clientY, x: p ? parseFloat(p[1]) : 50, y: p ? parseFloat(p[2]) : 50 };
+    coverZone.setPointerCapture(e.pointerId);
+  });
+  coverZone.addEventListener('pointermove', (e) => {
+    if (!coverDrag) return;
+    const rect = coverZone.getBoundingClientRect();
+    coverDrag.x -= ((e.clientX - coverDrag.lastX) / Math.max(rect.width, 1)) * 100 * 0.45;
+    coverDrag.y -= ((e.clientY - coverDrag.lastY) / Math.max(rect.height, 1)) * 100 * 0.45;
+    coverDrag.x = Math.min(100, Math.max(0, coverDrag.x));
+    coverDrag.y = Math.min(100, Math.max(0, coverDrag.y));
+    coverDrag.lastX = e.clientX; coverDrag.lastY = e.clientY;
+    coverPosInput.value = `${Math.round(coverDrag.x)}% ${Math.round(coverDrag.y)}%`;
+    coverImg.style.objectPosition = coverPosInput.value;
+    markDirty();
+  });
+  const endDrag = (e) => { coverDrag = null; try { coverZone.releasePointerCapture(e.pointerId); } catch(_) {} };
+  coverZone.addEventListener('pointerup', endDrag);
+  coverZone.addEventListener('pointercancel', endDrag);
+
+  ['pt-title','pt-desc','slug-pt','en-title','en-desc','slug-en','author-name','featured-alt'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => { refreshPreviews(); markDirty(); });
+  });
+  ['pt-service','en-service','published-date','post-kind'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', markDirty);
+  });
+  quillPt.on('text-change', markDirty);
+  quillEn.on('text-change', markDirty);
+
+  document.getElementById('pt-title').addEventListener('blur', () => {
+    if (!document.getElementById('slug-pt').value)
+      document.getElementById('slug-pt').value = AdminPortal.toSlug(document.getElementById('pt-title').value);
+    refreshPreviews();
+  });
+  document.getElementById('en-title').addEventListener('blur', () => {
+    if (!document.getElementById('slug-en').value)
+      document.getElementById('slug-en').value = AdminPortal.toSlug(document.getElementById('en-title').value);
+    refreshPreviews();
+  });
+
+  const params = new URLSearchParams(location.search);
+  const postId = params.get('id');
+  let currentPost = null;
+  let isDirty = false;
+  function markDirty() { isDirty = true; }
+
+  function refreshPendingUI() {
+    const banner = document.getElementById('editor-pending-banner');
+    const btnSync = document.getElementById('btn-sync-site');
+    if (!currentPost || currentPost.status !== 'published') { banner.style.display = 'none'; btnSync.style.display = 'none'; return; }
+    const show = AdminPortal.postTemAlteracoesAposPublicacao(currentPost);
+    banner.style.display = show ? 'block' : 'none';
+    btnSync.style.display = show ? '' : 'none';
+  }
+
+  if (postId) {
+    document.getElementById('page-title').textContent = 'Editar Post';
+    try { currentPost = await AdminPortal.obterPost(postId); preencherForm(currentPost); }
+    catch(e) { AdminPortal.toast('Erro ao carregar post: ' + e.message, 'error'); }
+  }
+
+  function preencherForm(post) {
+    document.getElementById('slug-pt').value          = post.slug_pt || '';
+    document.getElementById('slug-en').value          = post.slug_en || '';
+    const kindEl = document.getElementById('post-kind');
+    const pk = (post.post_kind || 'article').replace(/-/g,'_');
+    if (['article','report','case_study'].includes(pk)) kindEl.value = pk;
+    document.getElementById('author-name').value      = post.author_name || 'Porto Coast Stays';
+    document.getElementById('pt-title').value         = post.pt_title || '';
+    document.getElementById('pt-desc').value          = post.pt_description || '';
+    document.getElementById('en-title').value         = post.en_title || '';
+    document.getElementById('en-desc').value          = post.en_description || '';
+    document.getElementById('featured-image').value   = post.featured_image_url || '';
+    document.getElementById('featured-alt').value     = post.featured_image_alt || '';
+    overlayColorEl.value = post.featured_image_overlay_color || '#001D2E';
+    overlayOpEl.value    = post.featured_image_overlay_opacity ?? 60;
+    overlayValEl.textContent = overlayOpEl.value;
+    coverPosInput.value  = post.featured_image_position || '50% 50%';
+    if (post.published_at) document.getElementById('published-date').value = post.published_at.slice(0, 10);
+    const ptSvc = document.getElementById('pt-service'); if (post.pt_related_service) ptSvc.value = post.pt_related_service;
+    const enSvc = document.getElementById('en-service'); if (post.en_related_service) enSvc.value = post.en_related_service;
+    quillPt.root.innerHTML = post.pt_content_html || '';
+    quillEn.root.innerHTML = post.en_content_html || '';
+    const badge = document.getElementById('post-status-badge');
+    badge.innerHTML = `<span class="badge badge-${post.status}">${post.status === 'published' ? 'Publicado' : post.status === 'draft' ? 'Rascunho' : 'Arquivado'}</span>`;
+    document.getElementById('current-post-id').textContent = `ID: ${post.id}`;
+    document.getElementById('btn-preview').style.display = '';
+    if (post.status === 'published') {
+      document.getElementById('btn-publish').style.display   = 'none';
+      document.getElementById('btn-unpublish').style.display = '';
+    }
+    refreshCover(); refreshPreviews(); refreshPendingUI();
+  }
+
+  function construirPayload() {
+    return {
+      slug_pt: document.getElementById('slug-pt').value.trim(),
+      slug_en: document.getElementById('slug-en').value.trim(),
+      category_pt: '', category_en: '',
+      post_kind: document.getElementById('post-kind').value,
+      author_name: document.getElementById('author-name').value.trim() || 'Porto Coast Stays',
+      featured_image_url: document.getElementById('featured-image').value.trim(),
+      featured_image_alt: document.getElementById('featured-alt').value.trim(),
+      featured_image_overlay_color:   overlayColorEl.value,
+      featured_image_overlay_opacity: parseInt(overlayOpEl.value, 10),
+      featured_image_position: coverPosInput.value.trim() || '50% 50%',
+      pt_title: document.getElementById('pt-title').value.trim(),
+      pt_description: document.getElementById('pt-desc').value.trim(),
+      pt_related_service: document.getElementById('pt-service').value,
+      pt_content_html: AdminPortal.sanitizeHtml(quillPt.root.innerHTML),
+      en_title: document.getElementById('en-title').value.trim(),
+      en_description: document.getElementById('en-desc').value.trim(),
+      en_related_service: document.getElementById('en-service').value,
+      en_content_html: AdminPortal.sanitizeHtml(quillEn.root.innerHTML),
+    };
+  }
+
+  function validar(payload) {
+    const erros = [];
+    if (!payload.slug_pt)  erros.push('Slug PT é obrigatório');
+    if (!payload.pt_title) erros.push('Título PT é obrigatório');
+    if (/\s/.test(payload.slug_pt)) erros.push('Slug PT não pode ter espaços');
+    if (payload.pt_title.length > 60)        erros.push('Título PT > 60 caracteres');
+    if (payload.pt_description.length > 160) erros.push('Meta descrição PT > 160 caracteres');
+    return erros;
+  }
+
+  async function savePost(publish = false) {
+    const payload = construirPayload();
+    const erros = validar(payload);
+    const errEl = document.getElementById('validation-errors');
+    if (erros.length) {
+      errEl.innerHTML = erros.map(e => `<div>• ${e}</div>`).join('');
+      errEl.style.display = 'block';
+      errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return null;
+    }
+    errEl.style.display = 'none';
+    if (publish) payload.status = 'published';
+    else payload.status = currentPost?.status || 'draft';
+
+    if (currentPost) {
+      if (publish) payload.published_at = new Date().toISOString();
+      currentPost = await AdminPortal.atualizarPost(currentPost.id, payload);
+    } else {
+      payload.status = publish ? 'published' : 'draft';
+      if (publish) payload.published_at = new Date().toISOString();
+      currentPost = await AdminPortal.criarPost(payload);
+      history.replaceState({}, '', `/admin/editor?id=${currentPost.id}`);
+      document.getElementById('current-post-id').textContent = `ID: ${currentPost.id}`;
+      document.getElementById('btn-preview').style.display = '';
+    }
+    isDirty = false;
+    document.getElementById('autosave-status').textContent = 'Guardado';
+    preencherForm(currentPost);
+    return currentPost;
+  }
+
+  // Autosave
+  setInterval(async () => {
+    if (!isDirty) return;
+    const payload = construirPayload();
+    if (!payload.pt_title && !payload.en_title) return;
+    document.getElementById('autosave-status').textContent = 'A guardar…';
+    try { await savePost(); document.getElementById('autosave-status').textContent = 'Guardado automaticamente'; }
+    catch(_) { document.getElementById('autosave-status').textContent = 'Erro ao guardar'; }
+  }, 60000);
+
+  document.getElementById('btn-save-draft').addEventListener('click', async () => {
+    try { await savePost(); AdminPortal.toast('Rascunho guardado', 'success'); }
+    catch(e) { AdminPortal.toast(e.message, 'error'); }
+  });
+
+  document.getElementById('btn-publish').addEventListener('click', async () => {
+    try {
+      await savePost(true);
+      AdminPortal.toast('Post publicado!', 'success');
+      const r = await AdminPortal.agendarBuildSitePublico();
+      if (r.ok) AdminPortal.toast('Build iniciado — site atualizado em ~1 min.', 'info', 7000);
+    } catch(e) { AdminPortal.toast(e.message, 'error'); }
+  });
+
+  document.getElementById('btn-sync-site').addEventListener('click', async () => {
+    try {
+      await savePost(true);
+      await AdminPortal.dispararBuildSitePublico();
+      AdminPortal.toast('Site sincronizado!', 'success');
+    } catch(e) { AdminPortal.toast(e.message, 'error'); }
+  });
+
+  document.getElementById('btn-unpublish').addEventListener('click', async () => {
+    try { await AdminPortal.despublicarPost(currentPost.id); currentPost = await AdminPortal.obterPost(currentPost.id); preencherForm(currentPost); AdminPortal.toast('Post despublicado', 'info'); }
+    catch(e) { AdminPortal.toast(e.message, 'error'); }
+  });
+
+  document.getElementById('btn-preview').addEventListener('click', () => {
+    if (currentPost) window.open(`/admin/preview?id=${currentPost.id}`, '_blank');
+  });
+})();
+</script>
+</body>
+</html>

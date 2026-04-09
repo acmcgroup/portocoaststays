@@ -1,11 +1,102 @@
-# Netlify: static site lives in /website (not repo root)
+# netlify.toml — Porto Coast Stays
+
 [build]
+  base    = "."
   publish = "website"
-  # No build step - plain HTML/CSS
+  command = "node scripts/generate-admin-config.js"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# ── Functions ─────────────────────────────────────────────────────────────────
+[functions]
+  directory = "netlify/functions"
+
+# ── Redirects & routing ───────────────────────────────────────────────────────
+
+# Admin routes — serve .html files without extension
+[[redirects]]
+  from  = "/admin/"
+  to    = "/admin/index.html"
+  status = 200
+
+[[redirects]]
+  from  = "/admin/login"
+  to    = "/admin/login.html"
+  status = 200
+
+[[redirects]]
+  from  = "/admin/register"
+  to    = "/admin/register.html"
+  status = 200
+
+[[redirects]]
+  from  = "/admin/posts"
+  to    = "/admin/posts.html"
+  status = 200
+
+[[redirects]]
+  from  = "/admin/editor"
+  to    = "/admin/editor.html"
+  status = 200
+
+[[redirects]]
+  from  = "/admin/preview"
+  to    = "/admin/preview.html"
+  status = 200
+
+[[redirects]]
+  from  = "/admin/media"
+  to    = "/admin/media.html"
+  status = 200
+
+[[redirects]]
+  from  = "/admin/users"
+  to    = "/admin/users.html"
+  status = 200
+
+[[redirects]]
+  from  = "/admin/properties"
+  to    = "/admin/properties.html"
+  status = 200
+
+[[redirects]]
+  from  = "/admin/property"
+  to    = "/admin/property.html"
+  status = 200
+
+[[redirects]]
+  from  = "/admin/property-tasks"
+  to    = "/admin/property-tasks.html"
+  status = 200
+
+[[redirects]]
+  from  = "/admin/company-tasks"
+  to    = "/admin/company-tasks.html"
+  status = 200
+
+# Netlify function proxy (no trailing slash needed)
+[[redirects]]
+  from  = "/.netlify/functions/*"
+  to    = "/.netlify/functions/:splat"
+  status = 200
+
+# ── Headers ───────────────────────────────────────────────────────────────────
+[[headers]]
+  for = "/admin/*"
+    [headers.values]
+      X-Frame-Options        = "DENY"
+      X-Content-Type-Options = "nosniff"
+      Referrer-Policy        = "strict-origin-when-cross-origin"
+      Cache-Control          = "no-store, no-cache, must-revalidate"
 
 [[headers]]
+  for = "/admin/config.js"
+    [headers.values]
+      Cache-Control = "no-store"
+
+# Allow Supabase CDN (for anon key in config.js — it's a public key, not a secret)
+[[headers]]
   for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+    [headers.values]
+      X-Content-Type-Options = "nosniff"

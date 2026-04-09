@@ -11,3 +11,11 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 *.log
+
+# Admin portal config (contains Supabase keys)
+website/admin/config.js
+
+# Node
+node_modules/
+.env
+.env.local

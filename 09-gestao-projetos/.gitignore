@@ -1,0 +1,5 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+porto-coast-stays-zoho-projects.xlsx

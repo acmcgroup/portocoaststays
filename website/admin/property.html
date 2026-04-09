@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Imóvel — Porto Coast Stays Admin</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="admin-wrapper">
+  <div id="sidebar-mount"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-heading">
+        <h1 id="page-title">Novo Imóvel</h1>
+        <span id="breadcrumb" class="topbar-breadcrumb"></span>
+      </div>
+      <div class="topbar-actions">
+        <a href="/admin/properties" class="btn btn-secondary">← Imóveis</a>
+        <button id="btn-delete" type="button" class="btn btn-danger" style="display:none">Apagar imóvel</button>
+        <a id="btn-tasks" href="#" class="btn btn-primary" style="display:none">📋 Ver Tasks</a>
+      </div>
+    </div>
+    <div class="content-area">
+      <div id="validation-errors" class="alert alert-danger" style="display:none"></div>
+      <form id="prop-form" novalidate>
+        <div class="card">
+          <div class="card-header"><h2>Identificação</h2></div>
+          <div class="card-body">
+            <div class="fields-row">
+              <div class="field-group campo-mb">
+                <label for="prop-name">Nome do alojamento *</label>
+                <input id="prop-name" type="text" placeholder="ex: Apartamento Porto Centro" required/>
+              </div>
+              <div class="field-group campo-mb">
+                <label for="prop-typology">Tipologia</label>
+                <select id="prop-typology">
+                  <option value="apartamento">Apartamento</option>
+                  <option value="moradia">Moradia</option>
+                  <option value="quarto">Quarto</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+            </div>
+            <div class="fields-row">
+              <div class="field-group campo-mb">
+                <label for="prop-rnal">Número RNAL</label>
+                <input id="prop-rnal" type="text" placeholder="AL/Porto/XXXXX"/>
+              </div>
+              <div class="field-group campo-mb">
+                <label for="prop-nif">NIF do titular</label>
+                <input id="prop-nif" type="text" placeholder="ex: 123456789"/>
+              </div>
+            </div>
+            <div class="fields-row">
+              <div class="field-group campo-mb">
+                <label for="prop-status">Estado</label>
+                <select id="prop-status">
+                  <option value="setup">Em configuração (setup)</option>
+                  <option value="active">Activo</option>
+                  <option value="suspended">Suspenso</option>
+                  <option value="closed">Encerrado</option>
+                </select>
+              </div>
+              <div class="field-group campo-mb" id="owner-group" style="display:none">
+                <label for="prop-owner">Proprietário</label>
+                <select id="prop-owner"><option value="">— Selecionar proprietário —</option></select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h2>Localização</h2></div>
+          <div class="card-body">
+            <div class="field-group campo-mb">
+              <label for="prop-address">Morada completa *</label>
+              <input id="prop-address" type="text" placeholder="Rua, nº, andar" required/>
+            </div>
+            <div class="fields-row-3">
+              <div class="field-group">
+                <label for="prop-city">Localidade *</label>
+                <input id="prop-city" type="text" placeholder="Porto" required/>
+              </div>
+              <div class="field-group">
+                <label for="prop-postal">Código postal</label>
+                <input id="prop-postal" type="text" placeholder="4000-001"/>
+              </div>
+              <div class="field-group">
+                <label for="prop-municipality">Município</label>
+                <select id="prop-municipality">
+                  <option value="">— Selecionar —</option>
+                  <option value="Porto">Porto</option>
+                  <option value="Matosinhos">Matosinhos</option>
+                  <option value="Gaia">Gaia</option>
+                  <option value="Maia">Maia</option>
+                  <option value="Braga">Braga</option>
+                  <option value="Lisboa">Lisboa</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h2>Notas</h2></div>
+          <div class="card-body">
+            <div class="field-group">
+              <label for="prop-notes">Notas internas (não visível ao proprietário)</label>
+              <textarea id="prop-notes" rows="4" placeholder="Informações operacionais, estado da chave, etc."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <a href="/admin/properties" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-accent" id="btn-save">💾 Guardar imóvel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+<script src="sidebar.js"></script>
+<script>
+(async () => {
+  'use strict';
+  const session = await initSidebar('properties');
+  if (!session) return;
+
+  const role = await AdminPortal.obterMeuRole();
+  const me   = await AdminPortal.obterUser();
+  const params = new URLSearchParams(location.search);
+  const propId  = params.get('id');
+  let currentProp = null;
+
+  if (role === 'admin') {
+    document.getElementById('owner-group').style.display = '';
+    try {
+      const users = await AdminPortal.listarUtilizadores();
+      const sel = document.getElementById('prop-owner');
+      users.filter(u => u.client === 'portocoaststays').forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = `${u.nome || u.email} (${u.email})`;
+        sel.appendChild(opt);
+      });
+    } catch(_) {}
+  }
+
+  if (propId) {
+    document.getElementById('page-title').textContent = 'Editar Imóvel';
+    document.getElementById('btn-delete').style.display = role === 'admin' ? '' : 'none';
+    document.getElementById('btn-tasks').style.display = '';
+    document.getElementById('btn-tasks').href = `/admin/property-tasks?id=${propId}`;
+    document.getElementById('breadcrumb').innerHTML = `<a href="/admin/properties">Imóveis</a> / Editar`;
+    try {
+      currentProp = await AdminPortal.obterPropriedade(propId);
+      preencherForm(currentProp);
+    } catch(e) { AdminPortal.toast('Erro ao carregar imóvel: ' + e.message, 'error'); }
+  }
+
+  function preencherForm(p) {
+    document.getElementById('prop-name').value       = p.name         || '';
+    document.getElementById('prop-typology').value   = p.typology     || 'apartamento';
+    document.getElementById('prop-rnal').value       = p.rnal_number  || '';
+    document.getElementById('prop-nif').value        = p.nif_titular  || '';
+    document.getElementById('prop-status').value     = p.status       || 'setup';
+    document.getElementById('prop-address').value    = p.address      || '';
+    document.getElementById('prop-city').value       = p.city         || '';
+    document.getElementById('prop-postal').value     = p.postal_code  || '';
+    document.getElementById('prop-notes').value      = p.notes        || '';
+    const muni = document.getElementById('prop-municipality');
+    if (p.municipality) muni.value = p.municipality;
+    if (role === 'admin' && p.owner_id) document.getElementById('prop-owner').value = p.owner_id;
+  }
+
+  document.getElementById('btn-delete').addEventListener('click', async () => {
+    if (!currentProp) return;
+    if (!confirm(`Apagar imóvel "${currentProp.name || currentProp.id}"?\nTodas as tasks e comentários serão perdidos.`)) return;
+    try {
+      await AdminPortal.apagarPropriedade(currentProp.id);
+      AdminPortal.toast('Imóvel apagado', 'info');
+      window.location.href = '/admin/properties';
+    } catch(e) { AdminPortal.toast(e.message, 'error'); }
+  });
+
+  document.getElementById('prop-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const erros = [];
+    const name    = document.getElementById('prop-name').value.trim();
+    const address = document.getElementById('prop-address').value.trim();
+    const city    = document.getElementById('prop-city').value.trim();
+    if (!name)    erros.push('Nome do alojamento é obrigatório');
+    if (!address) erros.push('Morada é obrigatória');
+    if (!city)    erros.push('Localidade é obrigatória');
+    const errEl = document.getElementById('validation-errors');
+    if (erros.length) {
+      errEl.innerHTML = erros.map(er => `<div>• ${er}</div>`).join('');
+      errEl.style.display = 'block';
+      errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    errEl.style.display = 'none';
+
+    const payload = {
+      name, address, city,
+      typology:   document.getElementById('prop-typology').value,
+      rnal_number: document.getElementById('prop-rnal').value.trim() || null,
+      nif_titular: document.getElementById('prop-nif').value.trim()  || null,
+      status:     document.getElementById('prop-status').value,
+      postal_code: document.getElementById('prop-postal').value.trim(),
+      municipality: document.getElementById('prop-municipality').value,
+      notes: document.getElementById('prop-notes').value.trim(),
+    };
+    if (role === 'admin') {
+      payload.owner_id = document.getElementById('prop-owner').value || null;
+    } else {
+      if (!currentProp) payload.owner_id = me?.id || null;
+    }
+
+    const btn = document.getElementById('btn-save');
+    btn.disabled = true; btn.textContent = 'A guardar…';
+    try {
+      if (currentProp) {
+        currentProp = await AdminPortal.atualizarPropriedade(currentProp.id, payload);
+        AdminPortal.toast('Imóvel atualizado!', 'success');
+      } else {
+        currentProp = await AdminPortal.criarPropriedade(payload);
+        AdminPortal.toast('Imóvel criado!', 'success');
+        history.replaceState({}, '', `/admin/property?id=${currentProp.id}`);
+        document.getElementById('page-title').textContent = 'Editar Imóvel';
+        document.getElementById('btn-delete').style.display = role === 'admin' ? '' : 'none';
+        document.getElementById('btn-tasks').style.display = '';
+        document.getElementById('btn-tasks').href = `/admin/property-tasks?id=${currentProp.id}`;
+        document.getElementById('breadcrumb').innerHTML = `<a href="/admin/properties">Imóveis</a> / Editar`;
+      }
+    } catch(ex) { AdminPortal.toast(ex.message, 'error'); }
+    btn.disabled = false; btn.textContent = '💾 Guardar imóvel';
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "porto-coast-stays",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Porto Coast Stays website & admin portal",
+  "scripts": {
+    "generate-config": "node scripts/generate-admin-config.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

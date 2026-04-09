@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Preview — Porto Coast Stays Admin</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+    .preview-bar { position: sticky; top: 0; background: #2B4C3F; color: #fff; padding: 10px 24px; display: flex; align-items: center; gap: 14px; z-index: 100; }
+    .preview-bar a { color: #fff; opacity: .7; font-size: .84rem; text-decoration: none; }
+    .preview-bar a:hover { opacity: 1; }
+    .preview-bar h1 { font-size: .95rem; flex: 1; }
+    .preview-lang-btn { padding: 5px 14px; border: 1px solid rgba(255,255,255,0.35); border-radius: 5px; background: none; color: #fff; cursor: pointer; font-size: .82rem; transition: background .15s; }
+    .preview-lang-btn.active, .preview-lang-btn:hover { background: rgba(255,255,255,0.15); }
+    .preview-frame { max-width: 860px; margin: 30px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.10); }
+    .preview-hero { position: relative; min-height: 280px; background: #1a1a1a; display: flex; align-items: flex-end; padding: 40px; }
+    .preview-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .preview-hero-overlay { position: absolute; inset: 0; }
+    .preview-hero-content { position: relative; z-index: 2; color: #fff; }
+    .preview-hero-title { font-size: 2rem; font-weight: 700; line-height: 1.25; font-family: Georgia, serif; }
+    .preview-body { padding: 36px 52px; line-height: 1.8; font-size: 1.06rem; }
+    .preview-body h1, .preview-body h2, .preview-body h3 { margin: 1.4em 0 .5em; font-family: Georgia, serif; }
+    .preview-body p { margin-bottom: 1em; }
+    .preview-body img { max-width: 100%; border-radius: 4px; margin: 1em 0; }
+    .preview-body ul, .preview-body ol { padding-left: 2em; margin-bottom: 1em; }
+    .preview-body blockquote { border-left: 3px solid #C4956A; padding-left: 1.2em; margin: 1.4em 0; font-style: italic; color: #555; }
+    .preview-meta { padding: 16px 52px; border-top: 1px solid #eee; font-size: .82rem; color: #999; }
+  </style>
+</head>
+<body>
+<div class="preview-bar">
+  <a href="javascript:window.close()">← Fechar</a>
+  <h1>Preview</h1>
+  <button class="preview-lang-btn active" id="btn-pt" onclick="setLang('pt')">PT</button>
+  <button class="preview-lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  <a id="edit-link" href="#">✏️ Editar</a>
+</div>
+<div class="preview-frame">
+  <div class="preview-hero">
+    <img id="hero-img" class="preview-hero-img" alt="" style="display:none"/>
+    <div id="hero-overlay" class="preview-hero-overlay"></div>
+    <div class="preview-hero-content">
+      <p id="preview-meta-top" style="font-size:.82rem;opacity:.75;margin-bottom:8px"></p>
+      <h1 id="preview-title" class="preview-hero-title"></h1>
+    </div>
+  </div>
+  <div class="preview-body" id="preview-body"></div>
+  <div class="preview-meta" id="preview-meta-bottom"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+<script>
+let _post = null, _lang = 'pt';
+async function loadPost() {
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) { document.getElementById('preview-body').textContent = 'Sem ID de post.'; return; }
+  const session = await AdminPortal.verificarAcesso();
+  if (!session) return;
+  _post = await AdminPortal.obterPost(id);
+  document.getElementById('edit-link').href = `/admin/editor?id=${id}`;
+  renderPreview();
+}
+function setLang(lang) {
+  _lang = lang;
+  document.getElementById('btn-pt').classList.toggle('active', lang === 'pt');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  renderPreview();
+}
+function renderPreview() {
+  if (!_post) return;
+  const p = _post;
+  const title = _lang === 'pt' ? p.pt_title : p.en_title;
+  const desc  = _lang === 'pt' ? p.pt_description : p.en_description;
+  const html  = _lang === 'pt' ? p.pt_content_html : p.en_content_html;
+  const imgEl = document.getElementById('hero-img');
+  if (p.featured_image_url) {
+    imgEl.src = p.featured_image_url;
+    imgEl.alt = p.featured_image_alt || '';
+    imgEl.style.display = '';
+    imgEl.style.objectPosition = p.featured_image_position || '50% 50%';
+  }
+  const ov = document.getElementById('hero-overlay');
+  const opacity = (p.featured_image_overlay_opacity ?? 60) / 100;
+  ov.style.background = p.featured_image_overlay_color || '#001D2E';
+  ov.style.opacity = String(opacity);
+  document.getElementById('preview-title').textContent = title || '(sem título)';
+  document.getElementById('preview-body').innerHTML = html || '';
+  document.getElementById('preview-meta-top').textContent = [
+    p.post_kind === 'article' ? 'Artigo' : p.post_kind === 'report' ? 'Relatório' : 'Caso',
+    p.published_at ? new Date(p.published_at).toLocaleDateString('pt-PT') : '',
+    p.author_name || '',
+  ].filter(Boolean).join(' · ');
+  document.getElementById('preview-meta-bottom').textContent = desc;
+}
+loadPost();
+</script>
+</body>
+</html>

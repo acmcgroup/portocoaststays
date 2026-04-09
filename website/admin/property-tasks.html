@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tasks do Imóvel — Porto Coast Stays Admin</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="admin-wrapper">
+  <div id="sidebar-mount"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-heading">
+        <h1 id="page-title">Tasks</h1>
+        <span id="breadcrumb" class="topbar-breadcrumb"></span>
+      </div>
+      <div class="topbar-actions">
+        <a href="/admin/properties" class="btn btn-secondary">← Imóveis</a>
+        <select id="filter-crit" style="padding:8px 12px;border:1px solid var(--admin-border);border-radius:var(--admin-radius);font-size:.84rem">
+          <option value="">Todas as criticidades</option>
+          <option value="bloqueante">Bloqueantes</option>
+          <option value="urgente">Urgentes</option>
+          <option value="importante">Importantes</option>
+          <option value="otimizacao">Otimizações</option>
+        </select>
+        <select id="filter-status" style="padding:8px 12px;border:1px solid var(--admin-border);border-radius:var(--admin-radius);font-size:.84rem">
+          <option value="">Todos os estados</option>
+          <option value="pending">Pendentes</option>
+          <option value="in_progress">Em curso</option>
+          <option value="completed">Concluídas</option>
+          <option value="blocked">Bloqueadas</option>
+        </select>
+      </div>
+    </div>
+    <div class="content-area">
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-val" id="stat-total">—</div><div class="stat-label">Total tasks</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-done">—</div><div class="stat-label">Concluídas</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-blocked">—</div><div class="stat-label">Bloqueadas</div></div>
+        <div class="stat-box">
+          <div class="progress-bar-wrap" style="margin-bottom:4px"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+          <div class="stat-label"><span id="pct-label">0%</span> concluído</div>
+        </div>
+      </div>
+      <div id="tasks-container"><p style="color:var(--admin-text-muted)">A carregar…</p></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+<script src="sidebar.js"></script>
+<script>
+(async () => {
+  'use strict';
+  const session = await initSidebar('properties');
+  if (!session) return;
+
+  const role   = await AdminPortal.obterMeuRole();
+  const me     = await AdminPortal.obterUser();
+  const params = new URLSearchParams(location.search);
+  const propId = params.get('id');
+
+  if (!propId) { document.getElementById('tasks-container').innerHTML = '<div class="alert alert-danger">ID de imóvel em falta.</div>'; return; }
+
+  let prop      = null;
+  let templates = [];
+  let statuses  = {};
+
+  async function init() {
+    try {
+      prop      = await AdminPortal.obterPropriedade(propId);
+      templates = await AdminPortal.listarTaskTemplates({ ambito: 'A' });
+      const rawStatus = await AdminPortal.listarPropertyTaskStatus(propId);
+      statuses = {};
+      rawStatus.forEach(s => { statuses[s.task_id] = s.status; });
+      document.getElementById('page-title').textContent = `Tasks — ${prop.name || 'Imóvel'}`;
+      document.getElementById('breadcrumb').innerHTML = `<a href="/admin/properties">Imóveis</a> / <a href="/admin/property?id=${propId}">${AdminPortal.escapeHtml(prop.name || propId)}</a> / Tasks`;
+      renderTasks();
+    } catch(e) { AdminPortal.toast('Erro: ' + e.message, 'error'); }
+  }
+
+  function filtered() {
+    const fc = document.getElementById('filter-crit').value;
+    const fs = document.getElementById('filter-status').value;
+    return templates.filter(t => {
+      if (fc && t.criticidade !== fc) return false;
+      if (fs) {
+        const st = statuses[t.id] || 'pending';
+        if (st !== fs) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderTasks() {
+    const list = filtered();
+    const total    = templates.length;
+    const totalSt  = templates.map(t => statuses[t.id] || 'pending');
+    const done     = totalSt.filter(s => s === 'completed').length;
+    const blocked  = totalSt.filter(s => s === 'blocked').length;
+    const pct      = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById('stat-total').textContent   = total;
+    document.getElementById('stat-done').textContent    = done;
+    document.getElementById('stat-blocked').textContent = blocked;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('pct-label').textContent = pct + '%';
+
+    // Group by section
+    const sections = {};
+    list.forEach(t => {
+      const k = t.section_name;
+      if (!sections[k]) sections[k] = [];
+      sections[k].push(t);
+    });
+
+    const container = document.getElementById('tasks-container');
+    if (!list.length) { container.innerHTML = '<div class="alert alert-info">Nenhuma task corresponde ao filtro.</div>'; return; }
+
+    container.innerHTML = Object.entries(sections).map(([sectionName, tasks]) => {
+      const sTotal = tasks.length;
+      const sDone  = tasks.filter(t => (statuses[t.id] || 'pending') === 'completed').length;
+      return `
+        <div class="task-section">
+          <div class="task-section-header">
+            <span class="task-section-title">${AdminPortal.escapeHtml(sectionName)}</span>
+            <span class="task-section-stats">${sDone}/${sTotal} concluídas</span>
+          </div>
+          ${tasks.map(t => renderTaskItem(t)).join('')}
+        </div>`;
+    }).join('');
+
+    // Wire events
+    container.querySelectorAll('.task-status-select').forEach(sel => {
+      sel.addEventListener('change', async (e) => {
+        const taskId   = e.target.dataset.taskId;
+        const newStatus = e.target.value;
+        try {
+          await AdminPortal.upsertPropertyTaskStatus(propId, taskId, newStatus);
+          statuses[taskId] = newStatus;
+          const item = e.target.closest('.task-item');
+          item.className = `task-item task-${newStatus}`;
+          updateBadge(item, taskId);
+          renderStats();
+        } catch(err) { AdminPortal.toast(err.message, 'error'); e.target.value = statuses[taskId] || 'pending'; }
+      });
+    });
+
+    container.querySelectorAll('.btn-comments-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const wrap = document.getElementById(`comments-${btn.dataset.taskId}`);
+        if (!wrap) return;
+        const isOpen = wrap.classList.toggle('open');
+        btn.setAttribute('aria-expanded', String(isOpen));
+        if (isOpen) loadComments(btn.dataset.taskId, wrap);
+      });
+    });
+
+    container.querySelectorAll('.btn-send-comment').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const taskId = btn.dataset.taskId;
+        const textarea = document.getElementById(`comment-text-${taskId}`);
+        const internalCb = document.getElementById(`comment-internal-${taskId}`);
+        const content = textarea?.value.trim();
+        if (!content) return;
+        btn.disabled = true;
+        try {
+          await AdminPortal.criarTaskComment({
+            propertyId: propId, taskId, content,
+            isInternal: role === 'admin' && internalCb?.checked,
+          });
+          textarea.value = '';
+          const wrap = document.getElementById(`comments-${taskId}`);
+          if (wrap?.classList.contains('open')) await loadComments(taskId, wrap);
+          AdminPortal.toast('Comentário adicionado', 'success');
+        } catch(err) { AdminPortal.toast(err.message, 'error'); }
+        btn.disabled = false;
+      });
+    });
+  }
+
+  function renderStats() {
+    const total   = templates.length;
+    const totalSt = templates.map(t => statuses[t.id] || 'pending');
+    const done    = totalSt.filter(s => s === 'completed').length;
+    const blocked = totalSt.filter(s => s === 'blocked').length;
+    const pct     = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById('stat-done').textContent    = done;
+    document.getElementById('stat-blocked').textContent = blocked;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('pct-label').textContent = pct + '%';
+  }
+
+  function updateBadge(item, taskId) {
+    const badgeWrap = item.querySelector('.task-item-badges');
+    const st = statuses[taskId] || 'pending';
+    const existingBadge = badgeWrap.querySelector('[class*="badge-task"]');
+    if (existingBadge) existingBadge.outerHTML = AdminPortal.taskStatusBadgeHtml(st);
+  }
+
+  function renderTaskItem(t) {
+    const st = statuses[t.id] || 'pending';
+    return `
+      <div class="task-item task-${st}" id="task-item-${t.id}">
+        <div class="task-item-header">
+          <span class="task-item-id">${AdminPortal.escapeHtml(t.id)}</span>
+          <div style="flex:1">
+            <div class="task-item-desc">${AdminPortal.escapeHtml(t.description)}</div>
+            ${t.notes ? `<div class="task-notes">${AdminPortal.escapeHtml(t.notes)}</div>` : ''}
+            <div class="task-item-resp" style="margin-top:3px">Resp: ${AdminPortal.escapeHtml(t.resp)}</div>
+          </div>
+          <div class="task-item-badges">
+            ${AdminPortal.criticidadeBadgeHtml(t.criticidade)}
+            ${AdminPortal.taskStatusBadgeHtml(st)}
+          </div>
+        </div>
+        <div class="task-item-actions">
+          <select class="task-status-select" data-task-id="${t.id}" value="${st}">
+            <option value="pending"     ${st === 'pending'     ? 'selected' : ''}>Pendente</option>
+            <option value="in_progress" ${st === 'in_progress' ? 'selected' : ''}>Em curso</option>
+            <option value="completed"   ${st === 'completed'   ? 'selected' : ''}>Concluído</option>
+            <option value="blocked"     ${st === 'blocked'     ? 'selected' : ''}>Bloqueado</option>
+          </select>
+          <button class="btn-comments-toggle" data-task-id="${t.id}" aria-expanded="false">
+            💬 Comentários
+          </button>
+        </div>
+        <div class="task-comments-wrap" id="comments-${t.id}">
+          <div class="comment-list" id="comment-list-${t.id}"></div>
+          <div class="comment-form">
+            <textarea id="comment-text-${t.id}" placeholder="Adicionar comentário…" rows="2"></textarea>
+            <div class="comment-form-actions">
+              ${role === 'admin' ? `<label class="comment-internal-toggle"><input type="checkbox" id="comment-internal-${t.id}"/> Interno</label>` : ''}
+              <button class="btn btn-sm btn-primary btn-send-comment" data-task-id="${t.id}">Enviar</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  async function loadComments(taskId, wrap) {
+    const list = wrap.querySelector(`#comment-list-${taskId}`);
+    try {
+      const comments = await AdminPortal.listarTaskComments({
+        propertyId: propId, taskId, showInternal: role === 'admin',
+      });
+      if (!comments.length) { list.innerHTML = '<p style="font-size:.8rem;color:var(--admin-text-muted);padding:4px 0">Sem comentários ainda.</p>'; return; }
+      list.innerHTML = comments.map(c => {
+        const isAdmin = c.author_role === 'admin';
+        const initials = ((c.profiles?.nome || 'U').split(' ').map(n => n[0]).join('').slice(0,2)).toUpperCase();
+        const ts = new Date(c.created_at).toLocaleString('pt-PT');
+        return `
+          <div class="comment-item">
+            <div class="comment-avatar ${isAdmin ? '' : 'avatar-user'}">${AdminPortal.escapeHtml(initials)}</div>
+            <div class="comment-bubble ${c.is_internal ? 'internal' : ''}">
+              <div class="comment-meta">${AdminPortal.escapeHtml(c.profiles?.nome || 'Utilizador')} · ${ts}${c.is_internal ? ' · <em>interno</em>' : ''}</div>
+              <div class="comment-content">${AdminPortal.escapeHtml(c.content)}</div>
+            </div>
+          </div>`;
+      }).join('');
+    } catch(e) { list.innerHTML = `<p style="color:var(--admin-danger);font-size:.8rem">${e.message}</p>`; }
+  }
+
+  document.getElementById('filter-crit').addEventListener('change', renderTasks);
+  document.getElementById('filter-status').addEventListener('change', renderTasks);
+
+  await init();
+})();
+</script>
+</body>
+</html>

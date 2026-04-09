@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Utilizadores — Porto Coast Stays Admin</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="admin-wrapper">
+  <div id="sidebar-mount"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-heading"><h1>Utilizadores</h1></div>
+      <div class="topbar-actions">
+        <input id="search" placeholder="Filtrar por email / nome…" style="padding:8px 12px;border:1px solid var(--admin-border);border-radius:var(--admin-radius);font-size:.84rem;width:220px"/>
+      </div>
+    </div>
+    <div class="content-area">
+      <div class="alert alert-info" style="margin-bottom:18px;font-size:.84rem">
+        <strong>Fluxo de activação:</strong> proprietários fazem auto-registo → admin atribui cliente + promove se necessário.
+      </div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-val" id="stat-total">—</div><div class="stat-label">Total</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-admins">—</div><div class="stat-label">Admins</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-owners">—</div><div class="stat-label">Proprietários</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-pending">—</div><div class="stat-label">Pendentes</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Todos os utilizadores</h2><span id="count-label" style="font-size:.8rem;color:var(--admin-text-muted)"></span></div>
+        <div style="overflow-x:auto">
+          <table class="data-table" id="users-table">
+            <thead>
+              <tr><th>Nome</th><th>Email</th><th>Cliente</th><th>Papel</th><th>Data registo</th><th>Ações</th></tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--admin-text-muted)">A carregar…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+<script src="sidebar.js"></script>
+<script>
+(async () => {
+  'use strict';
+  const session = await initSidebar('users', true);
+  if (!session) return;
+
+  const me = await AdminPortal.obterUser();
+  let allUsers = [];
+
+  async function carregarUtilizadores() {
+    try {
+      allUsers = await AdminPortal.listarUtilizadores();
+      renderUtilizadores(allUsers);
+    } catch(e) { AdminPortal.toast('Erro: ' + e.message, 'error'); }
+  }
+
+  function filtrar(users) {
+    const s = document.getElementById('search').value.trim().toLowerCase();
+    if (!s) return users;
+    return users.filter(u => (u.email || '').toLowerCase().includes(s) || (u.nome || '').toLowerCase().includes(s));
+  }
+
+  function renderUtilizadores(users) {
+    const filtered = filtrar(users);
+    document.getElementById('count-label').textContent = `${filtered.length} utilizador${filtered.length !== 1 ? 'es' : ''}`;
+    document.getElementById('stat-total').textContent   = users.length;
+    document.getElementById('stat-admins').textContent  = users.filter(u => u.role === 'admin' && u.client === 'portocoaststays').length;
+    document.getElementById('stat-owners').textContent  = users.filter(u => u.role === 'user'  && u.client === 'portocoaststays').length;
+    document.getElementById('stat-pending').textContent = users.filter(u => u.client !== 'portocoaststays').length;
+
+    const tbody = document.getElementById('users-tbody');
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--admin-text-muted)">Nenhum utilizador encontrado</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    filtered.forEach(u => {
+      const isPending  = u.client !== 'portocoaststays';
+      const isAdmin    = u.role === 'admin';
+      const isMe       = u.id === me?.id;
+      const dateLabel  = u.created_at ? new Date(u.created_at).toLocaleDateString('pt-PT') : '—';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${AdminPortal.escapeHtml(u.nome) || '<em style="color:var(--admin-text-muted)">—</em>'}</td>
+        <td style="font-size:.84rem">${AdminPortal.escapeHtml(u.email)}</td>
+        <td><span style="font-size:.8rem;font-family:monospace">${AdminPortal.escapeHtml(u.client || '—')}</span></td>
+        <td>
+          ${isPending
+            ? '<span class="badge badge-crit-urgente">Pendente</span>'
+            : isAdmin
+              ? '<span class="badge badge-admin">Admin</span>'
+              : '<span class="badge badge-user">Proprietário</span>'}
+        </td>
+        <td style="font-size:.82rem">${dateLabel}</td>
+        <td style="white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap">
+          ${isPending ? `<button class="btn btn-sm btn-success" data-assign="${u.id}">Ativar cliente</button>` : ''}
+          ${!isMe && !isPending && !isAdmin ? `<button class="btn btn-sm btn-accent" data-promote="${u.id}">→ Admin</button>` : ''}
+          ${!isMe && !isPending && isAdmin  ? `<button class="btn btn-sm btn-secondary" data-revoke="${u.id}">→ Utilizador</button>` : ''}
+          ${isMe ? '<span style="font-size:.76rem;color:var(--admin-text-muted)">(você)</span>' : ''}
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('[data-assign]').forEach(btn => btn.addEventListener('click', async () => {
+      try { await AdminPortal.assignClient(btn.dataset.assign); AdminPortal.toast('Cliente ativado', 'success'); await carregarUtilizadores(); }
+      catch(e) { AdminPortal.toast(e.message, 'error'); }
+    }));
+    tbody.querySelectorAll('[data-promote]').forEach(btn => btn.addEventListener('click', async () => {
+      if (!confirm('Promover este utilizador a Admin?')) return;
+      try { await AdminPortal.promoverAdmin(btn.dataset.promote); AdminPortal.toast('Promovido a Admin', 'success'); await carregarUtilizadores(); }
+      catch(e) { AdminPortal.toast(e.message, 'error'); }
+    }));
+    tbody.querySelectorAll('[data-revoke]').forEach(btn => btn.addEventListener('click', async () => {
+      if (!confirm('Revogar acesso de Admin?')) return;
+      try { await AdminPortal.revogarAdmin(btn.dataset.revoke); AdminPortal.toast('Acesso revogado', 'info'); await carregarUtilizadores(); }
+      catch(e) { AdminPortal.toast(e.message, 'error'); }
+    }));
+  }
+
+  document.getElementById('search').addEventListener('input', () => renderUtilizadores(allUsers));
+  await carregarUtilizadores();
+})();
+</script>
+</body>
+</html>
