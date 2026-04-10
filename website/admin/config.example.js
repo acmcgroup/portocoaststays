@@ -6,4 +6,5 @@ window.ADMIN_CONFIG = {
   SUPABASE_URL:      'https://nssmpthalivhfbdernye.supabase.co',
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zc21wdGhhbGl2aGZiZGVybnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNTM5OTksImV4cCI6MjA4OTkyOTk5OX0.4h0O2Ho5cxgs97eJz__DzV06cNxynw25dmXcaE_Ir-k',
   STORAGE_BUCKET:    'portocoaststays-media',
+  CLIENT_ID:           'portocoaststays',
 };

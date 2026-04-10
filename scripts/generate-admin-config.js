@@ -11,6 +11,7 @@
  *
  * Optional:
  *   STORAGE_BUCKET     — defaults to 'portocoaststays-media'
+ *   ADMIN_CLIENT_ID    — portal slug for signup metadata + admin checks (defaults to portocoaststays)
  */
 
 const fs   = require('fs');
@@ -19,6 +20,7 @@ const path = require('path');
 const SUPABASE_URL  = process.env.SUPABASE_URL       || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON_KEY      = process.env.SUPABASE_ANON_KEY  || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const BUCKET        = process.env.STORAGE_BUCKET      || 'portocoaststays-media';
+const CLIENT_ID     = process.env.ADMIN_CLIENT_ID     || 'portocoaststays';
 
 const outPath = path.join(__dirname, '..', 'website', 'admin', 'config.js');
 
@@ -41,6 +43,7 @@ window.ADMIN_CONFIG = {
   SUPABASE_URL:      ${JSON.stringify(SUPABASE_URL)},
   SUPABASE_ANON_KEY: ${JSON.stringify(ANON_KEY)},
   STORAGE_BUCKET:    ${JSON.stringify(BUCKET)},
+  CLIENT_ID:         ${JSON.stringify(CLIENT_ID)},
 };
 `;
 

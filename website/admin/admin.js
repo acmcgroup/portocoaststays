@@ -12,7 +12,7 @@ function getAdminConfig() {
 
 const _cfg = getAdminConfig();
 const ADMIN_BASE = '/admin';
-const CLIENT_ID = 'portocoaststays';
+const CLIENT_ID = _cfg.CLIENT_ID || 'portocoaststays';
 
 function adminHref(page) {
   const p = String(page ?? '').replace(/^\//, '').replace(/\.html$/i, '');
@@ -28,9 +28,29 @@ const _sb = supabase.createClient(
 
 // ── Auth ─────────────────────────────────────────────────────
 
+async function garantirAdesaoPortalPosLogin() {
+  const { error } = await _sb.rpc('portocoaststays_ensure_membership_on_login');
+  if (error) console.warn('[Admin] portocoaststays_ensure_membership_on_login:', error.message);
+}
+
+/** Chama após sessão já existente (ex.: voltar ao login com cookie) para criar adesão a este portal se faltar. */
+async function sincronizarAdesaoPortalSeAutenticado() {
+  const session = await obterSessao();
+  if (!session) return null;
+  await garantirAdesaoPortalPosLogin();
+  return obterAdesaoPortalAtual();
+}
+
+async function obterAdesaoPortalAtual() {
+  const { data, error } = await _sb.rpc('minha_adesao_portal', { p_client: CLIENT_ID });
+  if (error) { console.error('[Admin] minha_adesao_portal failed:', error.message); return null; }
+  return data?.[0] || null;
+}
+
 async function login(email, password) {
   const { data, error } = await _sb.auth.signInWithPassword({ email, password });
   if (error) throw new Error(translateAuthError(error.message));
+  await garantirAdesaoPortalPosLogin();
   return data.session;
 }
 
@@ -66,9 +86,9 @@ async function obterMeuClient() {
 async function verificarAdmin() {
   const session = await obterSessao();
   if (!session) { window.location.href = adminHref('login'); return null; }
-  const role   = await obterMeuRole();
-  const client = await obterMeuClient();
-  if (role !== 'admin' || client !== CLIENT_ID) {
+  const { data, error } = await _sb.rpc('minha_adesao_portal', { p_client: CLIENT_ID });
+  const adesao = data?.[0];
+  if (error || !adesao || adesao.role !== 'admin') {
     await _sb.auth.signOut();
     window.location.href = adminHref('login') + '?erro=sem_permissao';
     return null;
@@ -79,8 +99,8 @@ async function verificarAdmin() {
 async function verificarAcesso() {
   const session = await obterSessao();
   if (!session) { window.location.href = adminHref('login'); return null; }
-  const client = await obterMeuClient();
-  if (client !== CLIENT_ID) {
+  const { data, error } = await _sb.rpc('minha_adesao_portal', { p_client: CLIENT_ID });
+  if (error || !data?.[0]) {
     await _sb.auth.signOut();
     window.location.href = adminHref('login') + '?erro=sem_permissao';
     return null;
@@ -103,12 +123,9 @@ function translateAuthError(msg) {
 // ── Users ─────────────────────────────────────────────────────
 
 async function listarUtilizadores() {
-  const { data, error } = await _sb
-    .from('profiles')
-    .select('id, email, nome, role, client, created_at')
-    .order('created_at', { ascending: false });
+  const { data, error } = await _sb.rpc('listar_utilizadores_do_portal', { p_client: CLIENT_ID });
   if (error) throw error;
-  return data;
+  return data || [];
 }
 
 async function promoverAdmin(userId) {
@@ -487,6 +504,7 @@ function criticidadeBadgeHtml(c) {
 
 window.AdminPortal = {
   login, logout, signOutLocal, obterSessao, obterUser, obterMeuRole, obterMeuClient,
+  obterAdesaoPortalAtual, sincronizarAdesaoPortalSeAutenticado,
   verificarAdmin, verificarAcesso,
   listarUtilizadores, promoverAdmin, revogarAdmin, assignClient,
   listarPosts, obterPost, criarPost, atualizarPost, publicarPost, despublicarPost, apagarPost,

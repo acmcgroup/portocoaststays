@@ -41,12 +41,13 @@ exports.handler = async (event) => {
     if (authErr || !user) {
       return { statusCode: 401, headers, body: JSON.stringify({ error: 'Invalid or expired token' }) };
     }
-    const { data: profile, error: profileErr } = await sb
-      .from('profiles')
-      .select('role, client')
-      .eq('id', user.id)
+    const { data: membership, error: profileErr } = await sb
+      .from('profile_clients')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('client', 'portocoaststays')
       .single();
-    if (profileErr || !profile || !ALLOWED_ROLES.includes(profile.role) || profile.client !== 'portocoaststays') {
+    if (profileErr || !membership || !ALLOWED_ROLES.includes(membership.role)) {
       return { statusCode: 403, headers, body: JSON.stringify({ error: 'Insufficient permissions' }) };
     }
   }

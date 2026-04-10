@@ -79,9 +79,14 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-btn"></span>';
     try {
+      const portalClient = window.ADMIN_CONFIG.CLIENT_ID || 'portocoaststays';
       const { error } = await supabase
         .createClient(window.ADMIN_CONFIG.SUPABASE_URL, window.ADMIN_CONFIG.SUPABASE_ANON_KEY)
-        .auth.signUp({ email, password: senha, options: { data: { nome } } });
+        .auth.signUp({
+          email,
+          password: senha,
+          options: { data: { nome, client: portalClient, portal_client: portalClient } },
+        });
       if (error) throw new Error(error.message);
       form.style.display = 'none';
       document.getElementById('reg-footer').style.display = 'none';

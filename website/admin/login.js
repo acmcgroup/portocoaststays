@@ -30,17 +30,12 @@
 
     try {
       await AdminPortal.login(email, senha);
-      const role   = await AdminPortal.obterMeuRole();
-      const client = await AdminPortal.obterMeuClient();
-      if (client !== 'portocoaststays') {
+      const adesao = await AdminPortal.obterAdesaoPortalAtual();
+      if (!adesao) {
         await AdminPortal.signOutLocal();
-        throw new Error('A sua conta ainda não foi validada. Aguarde a ativação pela equipa Porto Coast Stays.');
+        throw new Error('Não foi possível confirmar o acesso a este portal. Tente novamente.');
       }
-      if (role === 'admin') {
-        window.location.href = '/admin/properties';
-      } else {
-        window.location.href = '/admin/properties';
-      }
+      window.location.href = '/admin/properties';
     } catch (err) {
       erro.textContent = err.message;
       erro.style.display = 'block';
@@ -50,13 +45,10 @@
   }
 
   async function verificarSessaoERedirecionar() {
-    const sessao = await AdminPortal.obterSessao();
-    if (sessao) {
-      const client = await AdminPortal.obterMeuClient();
-      if (client === 'portocoaststays') {
-        window.location.href = '/admin/properties';
-        return;
-      }
+    const adesao = await AdminPortal.sincronizarAdesaoPortalSeAutenticado();
+    if (adesao) {
+      window.location.href = '/admin/properties';
+      return;
     }
     const params = new URLSearchParams(window.location.search);
     if (params.get('erro') === 'sem_permissao') {
