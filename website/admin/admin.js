@@ -71,8 +71,9 @@ async function registarProprietario(email, password, nome) {
   });
 
   if (!error && data?.user) {
+    // Só com sessão: garantir_adesao_portal usa auth.uid(); sem sessão (ex. email a confirmar) seria null → viola NOT NULL.
+    // O trigger handle_new_user já insere profile_clients no INSERT em auth.users.
     if (data.session) await garantirAdesaoPortalPosLogin();
-    else try { await garantirAdesaoPortalPosLogin(); } catch (_) { /* sem sessão: adesão na 1.ª entrada */ }
     return { ...data, registKind: 'new' };
   }
 
