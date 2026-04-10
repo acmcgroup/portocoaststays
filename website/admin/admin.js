@@ -28,6 +28,7 @@ const _sb = supabase.createClient(
 
 // ── Auth ─────────────────────────────────────────────────────
 
+/** RPC só insere (user_id, portocoaststays, 'user'); promoção a admin só via admin existente. */
 async function garantirAdesaoPortalPosLogin() {
   const { error } = await _sb.rpc('portocoaststays_ensure_membership_on_login');
   if (error) console.warn('[Admin] portocoaststays_ensure_membership_on_login:', error.message);
