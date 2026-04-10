@@ -37,6 +37,15 @@ async function garantirAdesaoPortalPosLogin() {
   if (error) console.warn('[Admin] garantir_adesao_portal:', error.message);
 }
 
+/** Garante que o JWT está aplicado ao cliente antes do RPC (evita auth.uid() null logo após signUp/signIn). */
+async function aplicarSessaoEGarantirAdesao(session) {
+  if (!session) return;
+  const { error: e1 } = await _sb.auth.setSession(session);
+  if (e1) console.warn('[Admin] setSession:', e1.message);
+  await _sb.auth.getSession();
+  await garantirAdesaoPortalPosLogin();
+}
+
 /** Chama após sessão já existente (ex.: voltar ao login com cookie) para criar adesão a este portal se faltar. */
 async function sincronizarAdesaoPortalSeAutenticado() {
   const session = await obterSessao();
@@ -54,7 +63,7 @@ async function obterAdesaoPortalAtual() {
 async function login(email, password) {
   const { data, error } = await _sb.auth.signInWithPassword({ email, password });
   if (error) throw new Error(translateAuthError(error.message));
-  await garantirAdesaoPortalPosLogin();
+  await aplicarSessaoEGarantirAdesao(data.session);
   return data.session;
 }
 
@@ -71,9 +80,9 @@ async function registarProprietario(email, password, nome) {
   });
 
   if (!error && data?.user) {
-    // Só com sessão: garantir_adesao_portal usa auth.uid(); sem sessão (ex. email a confirmar) seria null → viola NOT NULL.
-    // O trigger handle_new_user já insere profile_clients no INSERT em auth.users.
-    if (data.session) await garantirAdesaoPortalPosLogin();
+    // Com sessão: reforçar setSession+getSession antes do RPC (evita user_id null).
+    // Sem sessão (ex. confirmação de email): o trigger handle_new_user já correu no INSERT em auth.users.
+    if (data.session) await aplicarSessaoEGarantirAdesao(data.session);
     return { ...data, registKind: 'new' };
   }
 
@@ -87,7 +96,7 @@ async function registarProprietario(email, password, nome) {
       }
       throw new Error(translateAuthError(e2.message));
     }
-    await garantirAdesaoPortalPosLogin();
+    await aplicarSessaoEGarantirAdesao(si.session);
     return { user: si.user, session: si.session, registKind: 'linked' };
   }
 
