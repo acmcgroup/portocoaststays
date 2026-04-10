@@ -20,18 +20,21 @@ function adminHref(page) {
   return `${ADMIN_BASE}/${p}`;
 }
 
-const _sb = supabase.createClient(
-  _cfg.SUPABASE_URL,
-  _cfg.SUPABASE_ANON_KEY,
-  { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
-);
+// Um único GoTrueClient por separador — evita aviso "Multiple GoTrueClient instances" se admin.js
+// for avaliado mais do que uma vez no mesmo documento.
+const _singletonKey = '__pcs_admin_supabase_singleton_v1';
+const _sb =
+  window[_singletonKey] ||
+  (window[_singletonKey] = supabase.createClient(_cfg.SUPABASE_URL, _cfg.SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+  }));
 
 // ── Auth ─────────────────────────────────────────────────────
 
-/** RPC só insere (user_id, portocoaststays, 'user'); promoção a admin só via admin existente. */
+/** RPC insere adesão a este portal (CLIENT_ID); promoção a admin só via admin existente. */
 async function garantirAdesaoPortalPosLogin() {
-  const { error } = await _sb.rpc('portocoaststays_ensure_membership_on_login');
-  if (error) console.warn('[Admin] portocoaststays_ensure_membership_on_login:', error.message);
+  const { error } = await _sb.rpc('garantir_adesao_portal', { p_client: CLIENT_ID });
+  if (error) console.warn('[Admin] garantir_adesao_portal:', error.message);
 }
 
 /** Chama após sessão já existente (ex.: voltar ao login com cookie) para criar adesão a este portal se faltar. */
@@ -53,6 +56,45 @@ async function login(email, password) {
   if (error) throw new Error(translateAuthError(error.message));
   await garantirAdesaoPortalPosLogin();
   return data.session;
+}
+
+/**
+ * Registo na página register.html. Se o email já existir (outro portal, mesma BD),
+ * faz login com a mesma palavra-passe e regista adesão a este portal — o utilizador não precisa de ir a "Entrar".
+ */
+async function registarProprietario(email, password, nome) {
+  const portalClient = CLIENT_ID;
+  const { data, error } = await _sb.auth.signUp({
+    email,
+    password,
+    options: { data: { nome, client: portalClient, portal_client: portalClient } },
+  });
+
+  if (!error && data?.user) {
+    if (data.session) await garantirAdesaoPortalPosLogin();
+    else try { await garantirAdesaoPortalPosLogin(); } catch (_) { /* sem sessão: adesão na 1.ª entrada */ }
+    return { ...data, registKind: 'new' };
+  }
+
+  if (error && authErrorIsDuplicateEmail(error.message)) {
+    const { data: si, error: e2 } = await _sb.auth.signInWithPassword({ email, password });
+    if (e2) {
+      if (e2.message.includes('Invalid login credentials') || /invalid.*credential/i.test(e2.message)) {
+        throw new Error(
+          'Este email já está registado connosco. Indique a mesma palavra-passe que usa no outro site, ou recupere a palavra-passe em Entrar.'
+        );
+      }
+      throw new Error(translateAuthError(e2.message));
+    }
+    await garantirAdesaoPortalPosLogin();
+    return { user: si.user, session: si.session, registKind: 'linked' };
+  }
+
+  if (error) throw new Error(translateAuthError(error.message));
+  if (!data?.user) {
+    throw new Error('Registo não concluído. Tente Entrar se já tiver conta.');
+  }
+  return { ...data, registKind: 'new' };
 }
 
 async function logout() {
@@ -89,8 +131,8 @@ async function verificarAdmin() {
   if (!session) { window.location.href = adminHref('login'); return null; }
   const { data, error } = await _sb.rpc('minha_adesao_portal', { p_client: CLIENT_ID });
   const adesao = data?.[0];
-  if (error || !adesao || adesao.role !== 'admin') {
-    await _sb.auth.signOut();
+  if (error || !adesao || adesao.role !== 'admin' || adesao.status !== 'active') {
+    // Não fazer signOut global: a mesma sessão pode ser válida noutro portal (outro CLIENT_ID).
     window.location.href = adminHref('login') + '?erro=sem_permissao';
     return null;
   }
@@ -101,8 +143,9 @@ async function verificarAcesso() {
   const session = await obterSessao();
   if (!session) { window.location.href = adminHref('login'); return null; }
   const { data, error } = await _sb.rpc('minha_adesao_portal', { p_client: CLIENT_ID });
-  if (error || !data?.[0]) {
-    await _sb.auth.signOut();
+  const adesao = data?.[0];
+  if (error || !adesao || adesao.status !== 'active') {
+    // Sem signOut: utilizador pode ter acesso activo noutro portal no mesmo projecto Supabase.
     window.location.href = adminHref('login') + '?erro=sem_permissao';
     return null;
   }
@@ -118,7 +161,17 @@ function translateAuthError(msg) {
   if (msg.includes('Email not confirmed'))       return 'Confirme o seu email antes de entrar.';
   if (msg.includes('Too many requests'))         return 'Demasiadas tentativas. Aguarde um momento.';
   if (msg.includes('User not found'))            return 'Utilizador não encontrado.';
+  if (/already\s+registered|already\s+been\s+registered|User\s+already\s+registered/i.test(msg)) {
+    return 'Este email já tem conta. Use Entrar ou recuperar a palavra-passe.';
+  }
   return msg;
+}
+
+/** Email já existe em auth (ex.: registo noutro portal do mesmo projecto Supabase). */
+function authErrorIsDuplicateEmail(msg) {
+  return /already\s+registered|already\s+been\s+registered|User\s+already\s+registered|already\s+exists|duplicate\s+key|email.*already/i.test(
+    String(msg || '')
+  );
 }
 
 // ── Users ─────────────────────────────────────────────────────
@@ -505,7 +558,7 @@ function criticidadeBadgeHtml(c) {
 
 window.AdminPortal = {
   login, logout, signOutLocal, obterSessao, obterUser, obterMeuRole, obterMeuClient,
-  obterAdesaoPortalAtual, sincronizarAdesaoPortalSeAutenticado,
+  obterAdesaoPortalAtual, sincronizarAdesaoPortalSeAutenticado, registarProprietario,
   verificarAdmin, verificarAcesso,
   listarUtilizadores, promoverAdmin, revogarAdmin, assignClient,
   listarPosts, obterPost, criarPost, atualizarPost, publicarPost, despublicarPost, apagarPost,

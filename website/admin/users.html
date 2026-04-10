@@ -74,9 +74,9 @@
     const filtered = filtrar(users);
     document.getElementById('count-label').textContent = `${filtered.length} utilizador${filtered.length !== 1 ? 'es' : ''}`;
     document.getElementById('stat-total').textContent   = users.length;
-    document.getElementById('stat-admins').textContent  = users.filter(u => u.role === 'admin' && u.client === 'portocoaststays').length;
-    document.getElementById('stat-owners').textContent  = users.filter(u => u.role === 'user'  && u.client === 'portocoaststays').length;
-    document.getElementById('stat-pending').textContent = users.filter(u => u.client !== 'portocoaststays').length;
+    document.getElementById('stat-admins').textContent  = users.filter(u => u.role === 'admin').length;
+    document.getElementById('stat-owners').textContent  = users.filter(u => u.role === 'user' && u.status === 'active').length;
+    document.getElementById('stat-pending').textContent = users.filter(u => u.status === 'pending').length;
 
     const tbody = document.getElementById('users-tbody');
     if (!filtered.length) {
@@ -85,7 +85,7 @@
     }
     tbody.innerHTML = '';
     filtered.forEach(u => {
-      const isPending  = u.client !== 'portocoaststays';
+      const isPending  = u.status === 'pending';
       const isAdmin    = u.role === 'admin';
       const isMe       = u.id === me?.id;
       const dateLabel  = u.created_at ? new Date(u.created_at).toLocaleDateString('pt-PT') : '—';

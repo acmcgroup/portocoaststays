@@ -32,8 +32,11 @@
       await AdminPortal.login(email, senha);
       const adesao = await AdminPortal.obterAdesaoPortalAtual();
       if (!adesao) {
-        await AdminPortal.signOutLocal();
         throw new Error('Não foi possível confirmar o acesso a este portal. Tente novamente.');
+      }
+      if (adesao.status !== 'active') {
+        // Sem signOut: a sessão pode ser usada noutro portal com adesão activa.
+        throw new Error('A sua conta está pendente de ativação neste portal. Pode continuar noutro portal se já tiver acesso. Será notificado por email.');
       }
       window.location.href = '/admin/properties';
     } catch (err) {
@@ -46,7 +49,7 @@
 
   async function verificarSessaoERedirecionar() {
     const adesao = await AdminPortal.sincronizarAdesaoPortalSeAutenticado();
-    if (adesao) {
+    if (adesao && adesao.status === 'active') {
       window.location.href = '/admin/properties';
       return;
     }

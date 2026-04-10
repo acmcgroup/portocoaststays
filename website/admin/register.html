@@ -18,10 +18,12 @@
       <div class="alert alert-info" style="font-size:.82rem">
         Após o registo, a sua conta ficará pendente de validação pela equipa Porto Coast Stays.
         Será notificado por email quando o acesso for ativado.
+        <strong>Se já tiver conta connosco</strong> (mesmo email), pode preencher este formulário à mesma:
+        usamos a mesma palavra-passe para pedir acesso a este site — não precisa de ir a «Entrar» primeiro.
       </div>
       <div class="login-erro" id="reg-erro"></div>
       <div id="reg-success" style="display:none" class="alert alert-success">
-        Conta criada! Verifique o seu email e aguarde a ativação pela nossa equipa.
+        <span id="reg-success-msg">Conta criada! Verifique o seu email e aguarde a ativação pela nossa equipa.</span>
       </div>
       <form id="form-register">
         <div class="campo-a campo-mb">
@@ -79,15 +81,18 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-btn"></span>';
     try {
-      const portalClient = window.ADMIN_CONFIG.CLIENT_ID || 'portocoaststays';
-      const { error } = await supabase
-        .createClient(window.ADMIN_CONFIG.SUPABASE_URL, window.ADMIN_CONFIG.SUPABASE_ANON_KEY)
-        .auth.signUp({
-          email,
-          password: senha,
-          options: { data: { nome, client: portalClient, portal_client: portalClient } },
-        });
-      if (error) throw new Error(error.message);
+      const result = await AdminPortal.registarProprietario(email, senha, nome);
+      const adesao = await AdminPortal.obterAdesaoPortalAtual();
+      if (adesao && adesao.status === 'active') {
+        window.location.href = '/admin/properties';
+        return;
+      }
+      const msgEl = document.getElementById('reg-success-msg');
+      if (result && result.registKind === 'linked') {
+        msgEl.textContent = 'Conta já existente: o pedido de acesso a este site foi registado com a sua palavra-passe. Aguarde a ativação pela nossa equipa (ou confirme o email se ainda não o fez).';
+      } else {
+        msgEl.textContent = 'Conta criada! Verifique o seu email e aguarde a ativação pela nossa equipa.';
+      }
       form.style.display = 'none';
       document.getElementById('reg-footer').style.display = 'none';
       okEl.style.display = 'block';
