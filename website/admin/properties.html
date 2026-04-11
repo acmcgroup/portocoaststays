@@ -56,6 +56,53 @@
   </div>
 </div>
 
+<!-- Painel rápido por imóvel: calendário + integrações -->
+<div id="property-panel-modal" class="admin-modal" style="display:none" aria-hidden="true">
+  <div class="admin-modal__backdrop" data-close-modal></div>
+  <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="property-panel-title">
+    <div class="admin-modal__header">
+      <div>
+        <h2 id="property-panel-title" class="admin-modal__title">Imóvel</h2>
+        <p id="property-panel-sub" class="admin-modal__sub"></p>
+      </div>
+      <button type="button" class="admin-modal__close" data-close-modal aria-label="Fechar">&times;</button>
+    </div>
+    <div class="admin-modal__body prop-panel-body">
+      <div class="prop-panel-col prop-panel-col--cal">
+        <div class="prop-panel-section-label">Disponibilidade</div>
+        <div class="prop-cal" id="prop-cal-root">
+          <div class="prop-cal__nav">
+            <button type="button" class="btn btn-sm btn-secondary" id="prop-cal-prev" aria-label="Mês anterior">←</button>
+            <span class="prop-cal__month" id="prop-cal-label"></span>
+            <button type="button" class="btn btn-sm btn-secondary" id="prop-cal-next" aria-label="Mês seguinte">→</button>
+          </div>
+          <div class="prop-cal__weekdays" aria-hidden="true"></div>
+          <div class="prop-cal__grid" id="prop-cal-grid"></div>
+          <p class="prop-cal__hint" id="prop-cal-selection">Selecione um dia para rever reservas no PMS.</p>
+        </div>
+      </div>
+      <div class="prop-panel-col prop-panel-col--actions">
+        <div class="prop-panel-block">
+          <div class="prop-panel-section-label">Canais e calendário</div>
+          <p class="prop-panel-hint">Ligue as contas OTA e mantenha o calendário alinhado com o PMS.</p>
+          <div class="prop-panel-btn-grid">
+            <button type="button" class="btn btn-sm btn-airbnb" id="prop-btn-airbnb">Ligar Airbnb</button>
+            <button type="button" class="btn btn-sm btn-booking" id="prop-btn-booking">Ligar Booking.com</button>
+            <button type="button" class="btn btn-sm btn-primary" id="prop-btn-sync">Sync calendar</button>
+          </div>
+        </div>
+        <div class="prop-panel-block prop-panel-block--compliance">
+          <div class="prop-panel-section-label">Hóspedes e entidades</div>
+          <p class="prop-panel-hint">Boletins de alojamento (ex.: fluxo SIBA / obrigações de reporte).</p>
+          <button type="button" class="btn btn-sm btn-secondary prop-panel-btn-wide" id="prop-btn-aima">
+            Inform AIMA / SEF (SIBA)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
 <script src="admin.js"></script>
@@ -67,6 +114,110 @@
   if (!session) return;
 
   const role = await AdminPortal.obterMeuRole();
+
+  /** Painel modal: imóvel activo + calendário */
+  let panelProp = null;
+  let calYear = new Date().getFullYear();
+  let calMonth = new Date().getMonth();
+  let calSelected = null;
+
+  const modalEl = document.getElementById('property-panel-modal');
+  const WEEKDAYS_PT = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+
+  function openPropertyPanel(prop) {
+    panelProp = prop;
+    calYear = new Date().getFullYear();
+    calMonth = new Date().getMonth();
+    calSelected = null;
+    document.getElementById('property-panel-title').textContent = prop.name || 'Imóvel';
+    const sub = [];
+    if (prop.municipality) sub.push(prop.municipality);
+    if (prop.rnal_number) sub.push('RNAL ' + prop.rnal_number);
+    document.getElementById('property-panel-sub').textContent = sub.length ? sub.join(' · ') : 'Sem RNAL — complete no formulário de edição';
+    modalEl.style.display = 'flex';
+    modalEl.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    const wd = modalEl.querySelector('.prop-cal__weekdays');
+    if (wd && !wd.dataset.ready) {
+      wd.innerHTML = WEEKDAYS_PT.map(d => `<span>${d}</span>`).join('');
+      wd.dataset.ready = '1';
+    }
+    renderCalendar();
+    document.getElementById('prop-cal-selection').textContent = 'Selecione um dia para rever reservas no PMS.';
+  }
+
+  function closePropertyPanel() {
+    modalEl.style.display = 'none';
+    modalEl.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    panelProp = null;
+  }
+
+  function renderCalendar() {
+    const label = document.getElementById('prop-cal-label');
+    const grid = document.getElementById('prop-cal-grid');
+    const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    label.textContent = `${months[calMonth]} ${calYear}`;
+    const first = new Date(calYear, calMonth, 1);
+    const startPad = (first.getDay() + 6) % 7;
+    const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < startPad; i++) cells.push('<span class="prop-cal__cell prop-cal__cell--empty"></span>');
+    const today = new Date();
+    const isThisMonth = today.getFullYear() === calYear && today.getMonth() === calMonth;
+    for (let d = 1; d <= lastDay; d++) {
+      const isToday = isThisMonth && today.getDate() === d;
+      const sel = calSelected && calSelected.y === calYear && calSelected.m === calMonth && calSelected.d === d;
+      let cls = 'prop-cal__cell';
+      if (isToday) cls += ' prop-cal__cell--today';
+      if (sel) cls += ' prop-cal__cell--selected';
+      cells.push(`<button type="button" class="${cls}" data-day="${d}">${d}</button>`);
+    }
+    grid.innerHTML = cells.join('');
+    grid.querySelectorAll('button[data-day]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const d = parseInt(btn.dataset.day, 10);
+        calSelected = { y: calYear, m: calMonth, d };
+        renderCalendar();
+        const iso = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        document.getElementById('prop-cal-selection').textContent =
+          `Dia ${iso} — sincronize reservas no PMS (Hostaway / Smoobu) para este imóvel.`;
+      });
+    });
+  }
+
+  document.getElementById('prop-cal-prev').addEventListener('click', () => {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  });
+  document.getElementById('prop-cal-next').addEventListener('click', () => {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  });
+
+  modalEl.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closePropertyPanel));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalEl.style.display === 'flex') closePropertyPanel();
+  });
+
+  document.getElementById('prop-btn-airbnb').addEventListener('click', () => {
+    AdminPortal.toast('Abrir extranet Airbnb para ligar o listing a este imóvel no PMS.', 'info');
+    window.open('https://www.airbnb.com/hosting', '_blank', 'noopener,noreferrer');
+  });
+  document.getElementById('prop-btn-booking').addEventListener('click', () => {
+    AdminPortal.toast('Abrir extranet Booking para mapear o hotel/apartamento ao PMS.', 'info');
+    window.open('https://admin.booking.com/', '_blank', 'noopener,noreferrer');
+  });
+  document.getElementById('prop-btn-sync').addEventListener('click', () => {
+    if (!panelProp) return;
+    AdminPortal.toast(`Pedido de sync de calendário registado para «${panelProp.name || 'imóvel'}» (ligar PMS em produção).`, 'success');
+  });
+  document.getElementById('prop-btn-aima').addEventListener('click', () => {
+    AdminPortal.toast('Portal SIBA / reporte de hóspedes — confirme credenciais no backoffice.', 'info');
+    window.open('https://siba.sef.pt/', '_blank', 'noopener,noreferrer');
+  });
 
   async function carregarPropriedades() {
     try {
@@ -113,13 +264,22 @@
             <div class="progress-label" id="plabel-${prop.id}">…</div>
           </div>
         </td>
-        <td style="white-space:nowrap;display:flex;gap:6px">
+        <td style="white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" class="btn btn-sm btn-accent" data-panel="${prop.id}">Painel</button>
           <a class="btn btn-sm btn-secondary" href="/admin/property?id=${prop.id}">Editar</a>
           <a class="btn btn-sm btn-primary" href="/admin/property-tasks?id=${prop.id}">Tasks</a>
           ${role === 'admin' ? `<button class="btn btn-sm btn-danger" data-delete="${prop.id}">Apagar</button>` : ''}
         </td>`;
       tbody.appendChild(tr);
       loadProgress(prop.id);
+    });
+
+    tbody.querySelectorAll('[data-panel]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.panel;
+        const prop = props.find(p => p.id === id);
+        if (prop) openPropertyPanel(prop);
+      });
     });
 
     tbody.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', async () => {

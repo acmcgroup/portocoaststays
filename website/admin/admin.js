@@ -358,21 +358,52 @@ async function apagarMedia(storagePath, assetId) {
 
 // ── Properties CRUD ───────────────────────────────────────────
 
+/** Anexa `profiles: { nome, email }` sem embed PostgREST (evita 400 por RLS / relação). */
+async function enriquecerPropriedadesComPerfilProprietario(rows) {
+  if (!rows?.length) return rows;
+  const role = await obterMeuRole();
+  const me = await obterUser();
+  const uid = me?.id;
+
+  if (role === 'admin') {
+    let users = [];
+    try {
+      users = await listarUtilizadores();
+    } catch (_) {}
+    const map = new Map(users.map((u) => [u.id, { nome: u.nome, email: u.email }]));
+    return rows.map((r) => ({
+      ...r,
+      profiles: r.owner_id ? map.get(r.owner_id) || null : null,
+    }));
+  }
+
+  let mine = null;
+  if (uid) {
+    const { data } = await _sb.from('profiles').select('nome, email').eq('id', uid).maybeSingle();
+    mine = data;
+  }
+  return rows.map((r) => ({
+    ...r,
+    profiles: r.owner_id && uid && r.owner_id === uid ? mine : null,
+  }));
+}
+
 async function listarPropriedades({ status = null, ownerId = null } = {}) {
-  let q = _sb.from('properties').select('*, profiles(nome, email)', { count: 'exact' });
+  let q = _sb.from('properties').select('*', { count: 'exact' });
   if (status)  q = q.eq('status', status);
   if (ownerId) q = q.eq('owner_id', ownerId);
   q = q.order('created_at', { ascending: false });
   const { data, error, count } = await q;
   if (error) throw error;
-  return { data, count };
+  const enriched = await enriquecerPropriedadesComPerfilProprietario(data || []);
+  return { data: enriched, count };
 }
 
 async function obterPropriedade(id) {
-  const { data, error } = await _sb.from('properties')
-    .select('*, profiles(nome, email)').eq('id', id).single();
+  const { data, error } = await _sb.from('properties').select('*').eq('id', id).single();
   if (error) throw error;
-  return data;
+  const [enriched] = await enriquecerPropriedadesComPerfilProprietario([data]);
+  return enriched;
 }
 
 async function criarPropriedade(payload) {

@@ -334,3 +334,182 @@ img { display: block; max-width: 100%; }
   .main-content { margin-left: 0; }
   .editor-actions { left: 0; }
 }
+
+/* ── Property quick panel modal (list view) ── */
+.admin-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.admin-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 23, 20, 0.45);
+  backdrop-filter: blur(2px);
+}
+.admin-modal__dialog {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  max-height: min(92vh, 640px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--admin-surface);
+  border-radius: var(--admin-radius-lg);
+  box-shadow: 0 16px 48px rgba(26, 23, 20, 0.18);
+  border: 1px solid var(--admin-border);
+}
+.admin-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--admin-border);
+  flex-shrink: 0;
+}
+.admin-modal__title { font-size: 1.05rem; font-weight: 600; margin: 0; line-height: 1.25; }
+.admin-modal__sub  { font-size: 0.78rem; color: var(--admin-text-muted); margin: 4px 0 0; line-height: 1.4; }
+.admin-modal__close {
+  background: var(--admin-surface2);
+  border: 1px solid var(--admin-border);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--admin-radius);
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--admin-text-muted);
+  flex-shrink: 0;
+  transition: var(--admin-trans);
+}
+.admin-modal__close:hover { color: var(--admin-text); background: var(--brand-cream-3); }
+.admin-modal__body.prop-panel-body {
+  padding: 16px 18px 18px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.prop-panel-section-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted);
+  margin-bottom: 8px;
+}
+.prop-panel-hint {
+  font-size: 0.78rem;
+  color: var(--admin-text-muted);
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+.prop-panel-block {
+  background: var(--admin-surface2);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.prop-panel-block--compliance {
+  background: rgba(43, 76, 63, 0.04);
+  border-color: rgba(43, 76, 63, 0.15);
+}
+.prop-panel-btn-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.prop-panel-btn-wide { width: 100%; justify-content: center; }
+
+.btn-airbnb {
+  background: #fff;
+  color: #222;
+  border: 1px solid #ff5a5f;
+}
+.btn-airbnb:hover:not(:disabled) {
+  background: #fff5f5;
+  border-color: #e04e52;
+}
+.btn-booking {
+  background: #003580;
+  color: #fff;
+  border: 1px solid #002f6c;
+}
+.btn-booking:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+/* Mini calendar */
+.prop-cal__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.prop-cal__month {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+.prop-cal__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+  text-align: center;
+}
+.prop-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.prop-cal__cell {
+  aspect-ratio: 1;
+  max-height: 40px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-surface);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--admin-text);
+  transition: var(--admin-trans);
+}
+.prop-cal__cell:hover:not(:disabled) {
+  border-color: var(--admin-primary);
+  background: var(--brand-green-pale);
+}
+.prop-cal__cell--empty { border: none; background: transparent; pointer-events: none; }
+.prop-cal__cell--today { box-shadow: inset 0 0 0 2px var(--brand-amber); }
+.prop-cal__cell--selected {
+  background: var(--admin-primary);
+  color: #fff;
+  border-color: var(--admin-primary);
+}
+.prop-cal__cell--selected:hover {
+  background: var(--admin-primary-hover);
+  color: #fff;
+}
+.prop-cal__hint {
+  font-size: 0.72rem;
+  color: var(--admin-text-muted);
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .admin-modal__body.prop-panel-body {
+    grid-template-columns: 1fr;
+  }
+}
