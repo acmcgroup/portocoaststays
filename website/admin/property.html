@@ -43,6 +43,10 @@
                 </select>
               </div>
             </div>
+            <div class="field-group campo-mb">
+              <label for="prop-cover">Imagem de capa (URL)</label>
+              <input id="prop-cover" type="text" placeholder="/assets/images/properties/… ou https://…"/>
+            </div>
             <div class="fields-row">
               <div class="field-group campo-mb">
                 <label for="prop-rnal">Número RNAL</label>
@@ -175,6 +179,8 @@
     document.getElementById('prop-city').value       = p.city         || '';
     document.getElementById('prop-postal').value     = p.postal_code  || '';
     document.getElementById('prop-notes').value      = p.notes        || '';
+    const coverEl = document.getElementById('prop-cover');
+    if (coverEl) coverEl.value = p.cover_image_url || '';
     const muni = document.getElementById('prop-municipality');
     if (p.municipality) muni.value = p.municipality;
     if (role === 'admin' && p.owner_id) document.getElementById('prop-owner').value = p.owner_id;
@@ -217,6 +223,7 @@
       postal_code: document.getElementById('prop-postal').value.trim(),
       municipality: document.getElementById('prop-municipality').value,
       notes: document.getElementById('prop-notes').value.trim(),
+      cover_image_url: (document.getElementById('prop-cover')?.value || '').trim() || null,
     };
     if (role === 'admin') {
       payload.owner_id = document.getElementById('prop-owner').value || null;

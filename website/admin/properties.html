@@ -32,24 +32,10 @@
       </div>
       <div class="card">
         <div class="card-header"><h2>Lista de imóveis</h2><span id="count-label" style="font-size:.8rem;color:var(--admin-text-muted)"></span></div>
-        <div style="overflow-x:auto">
-          <table class="data-table" id="properties-table">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Município</th>
-                <th>Tipologia</th>
-                <th>RNAL</th>
-                <th>Proprietário</th>
-                <th>Estado</th>
-                <th>Progresso</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="properties-tbody">
-              <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--admin-text-muted)">A carregar…</td></tr>
-            </tbody>
-          </table>
+        <div class="card-body prop-cards-wrap">
+          <div id="properties-cards" class="prop-cards-grid">
+            <p style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--admin-text-muted)">A carregar…</p>
+          </div>
         </div>
       </div>
     </div>
@@ -61,9 +47,14 @@
   <div class="admin-modal__backdrop" data-close-modal></div>
   <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="property-panel-title">
     <div class="admin-modal__header">
-      <div>
+      <div class="admin-modal__header-inner">
+        <div id="property-panel-thumb-wrap" class="prop-panel-thumb-wrap" style="display:none">
+          <img id="property-panel-thumb" src="" alt="" width="120" height="80" loading="lazy"/>
+        </div>
+        <div>
         <h2 id="property-panel-title" class="admin-modal__title">Imóvel</h2>
         <p id="property-panel-sub" class="admin-modal__sub"></p>
+        </div>
       </div>
       <button type="button" class="admin-modal__close" data-close-modal aria-label="Fechar">&times;</button>
     </div>
@@ -124,6 +115,15 @@
   const modalEl = document.getElementById('property-panel-modal');
   const WEEKDAYS_PT = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
+  function propertyCoverSrc(prop) {
+    const u = (prop.cover_image_url || '').trim();
+    if (u) return u.startsWith('http') ? u : u;
+    const n = (prop.name || '').toLowerCase();
+    if (n.includes('t1') && n.includes('matosinhos')) return '/assets/images/properties/t1-matosinhos.jpeg';
+    if (n.includes('t0') && n.includes('boa morte')) return '/assets/images/properties/t0-boa-morte.jpeg';
+    return '';
+  }
+
   function openPropertyPanel(prop) {
     panelProp = prop;
     calYear = new Date().getFullYear();
@@ -134,6 +134,14 @@
     if (prop.municipality) sub.push(prop.municipality);
     if (prop.rnal_number) sub.push('RNAL ' + prop.rnal_number);
     document.getElementById('property-panel-sub').textContent = sub.length ? sub.join(' · ') : 'Sem RNAL — complete no formulário de edição';
+    const thumbSrc = propertyCoverSrc(prop);
+    const tw = document.getElementById('property-panel-thumb-wrap');
+    const ti = document.getElementById('property-panel-thumb');
+    if (thumbSrc && tw && ti) {
+      ti.src = thumbSrc;
+      ti.alt = prop.name || 'Imóvel';
+      tw.style.display = '';
+    } else if (tw) { tw.style.display = 'none'; }
     modalEl.style.display = 'flex';
     modalEl.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -240,41 +248,53 @@
     document.getElementById('stat-active').textContent = props.filter(p => p.status === 'active').length;
     document.getElementById('stat-setup').textContent  = props.filter(p => p.status === 'setup').length;
 
-    const tbody = document.getElementById('properties-tbody');
+    const grid = document.getElementById('properties-cards');
     if (!props.length) {
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--admin-text-muted)">
+      grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--admin-text-muted)">
         Nenhum imóvel. ${role === 'admin' ? '<a href="/admin/property">Criar o primeiro →</a>' : ''}
-      </td></tr>`;
+      </p>`;
       return;
     }
-    tbody.innerHTML = '';
+    grid.innerHTML = '';
     props.forEach(prop => {
-      const owner = prop.profiles ? `${AdminPortal.escapeHtml(prop.profiles.nome || '')} <span style="font-size:.75rem;color:var(--admin-text-muted)">${AdminPortal.escapeHtml(prop.profiles.email || '')}</span>` : '—';
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="font-weight:500">${AdminPortal.escapeHtml(prop.name) || '<em style="font-weight:400;color:var(--admin-text-muted)">sem nome</em>'}</td>
-        <td>${AdminPortal.escapeHtml(prop.municipality) || '—'}</td>
-        <td style="font-size:.84rem">${TYPO[prop.typology] || prop.typology}</td>
-        <td style="font-family:monospace;font-size:.8rem">${AdminPortal.escapeHtml(prop.rnal_number) || '<span style="color:var(--admin-text-muted)">pendente</span>'}</td>
-        <td style="font-size:.84rem">${owner}</td>
-        <td>${propStatusBadge(prop.status)}</td>
-        <td>
-          <div id="prog-${prop.id}" style="min-width:120px">
-            <div class="progress-bar-wrap"><div class="progress-bar-fill" id="fill-${prop.id}" style="width:0%"></div></div>
-            <div class="progress-label" id="plabel-${prop.id}">…</div>
+      const owner = prop.profiles ? `${AdminPortal.escapeHtml(prop.profiles.nome || '')} <span class="prop-card__owner-email">${AdminPortal.escapeHtml(prop.profiles.email || '')}</span>` : '—';
+      const cover = propertyCoverSrc(prop);
+      const art = document.createElement('article');
+      art.className = 'prop-card';
+      art.innerHTML = `
+        <div class="prop-card__media">
+          ${cover
+            ? `<img class="prop-card__img" src="${AdminPortal.escapeHtml(cover)}" alt="${AdminPortal.escapeHtml(prop.name || '')}" loading="lazy" width="400" height="250"/>`
+            : `<div class="prop-card__placeholder">Sem foto</div>`}
+        </div>
+        <div class="prop-card__body">
+          <h3 class="prop-card__title">${AdminPortal.escapeHtml(prop.name) || '<em>sem nome</em>'}</h3>
+          <div class="prop-card__meta">
+            <span>${AdminPortal.escapeHtml(prop.municipality) || '—'}</span>
+            <span class="prop-card__dot">·</span>
+            <span>${TYPO[prop.typology] || prop.typology}</span>
           </div>
-        </td>
-        <td style="white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap">
-          <button type="button" class="btn btn-sm btn-accent" data-panel="${prop.id}">Painel</button>
-          <a class="btn btn-sm btn-secondary" href="/admin/property?id=${prop.id}">Editar</a>
-          <a class="btn btn-sm btn-primary" href="/admin/property-tasks?id=${prop.id}">Tasks</a>
-          ${role === 'admin' ? `<button class="btn btn-sm btn-danger" data-delete="${prop.id}">Apagar</button>` : ''}
-        </td>`;
-      tbody.appendChild(tr);
+          <div class="prop-card__rnal">${prop.rnal_number ? AdminPortal.escapeHtml(prop.rnal_number) : '<span class="prop-card__pending">RNAL pendente</span>'}</div>
+          <div class="prop-card__owner">${owner}</div>
+          <div class="prop-card__row">
+            ${propStatusBadge(prop.status)}
+            <div id="prog-${prop.id}" class="prop-card__prog">
+              <div class="progress-bar-wrap"><div class="progress-bar-fill" id="fill-${prop.id}" style="width:0%"></div></div>
+              <div class="progress-label" id="plabel-${prop.id}">…</div>
+            </div>
+          </div>
+          <div class="prop-card__actions">
+            <button type="button" class="btn btn-sm btn-accent" data-panel="${prop.id}">Painel</button>
+            <a class="btn btn-sm btn-secondary" href="/admin/property?id=${prop.id}">Editar</a>
+            <a class="btn btn-sm btn-primary" href="/admin/property-tasks?id=${prop.id}">Tasks</a>
+            ${role === 'admin' ? `<button class="btn btn-sm btn-danger" data-delete="${prop.id}">Apagar</button>` : ''}
+          </div>
+        </div>`;
+      grid.appendChild(art);
       loadProgress(prop.id);
     });
 
-    tbody.querySelectorAll('[data-panel]').forEach(btn => {
+    grid.querySelectorAll('[data-panel]').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.dataset.panel;
         const prop = props.find(p => p.id === id);
@@ -282,7 +302,7 @@
       });
     });
 
-    tbody.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', async () => {
+    grid.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', async () => {
       if (!confirm('Apagar este imóvel e todas as suas tasks? Irreversível.')) return;
       try { await AdminPortal.apagarPropriedade(btn.dataset.delete); AdminPortal.toast('Imóvel apagado', 'info'); await carregarPropriedades(); }
       catch(e) { AdminPortal.toast(e.message, 'error'); }
