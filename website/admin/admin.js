@@ -187,12 +187,19 @@ function authErrorIsDuplicateEmail(msg) {
 
 // ── Users ─────────────────────────────────────────────────────
 
+/** PostgREST sometimes returns a single row as an object instead of a one-element array. */
+function normalizeRpcTableRows(data) {
+  if (data == null) return [];
+  if (Array.isArray(data)) return data;
+  return [data];
+}
+
 async function listarUtilizadores() {
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) throw new Error('Sessão inválida. Volte a entrar.');
   const { data, error } = await _sb.rpc('listar_utilizadores_do_portal', { p_client: CLIENT_ID });
   if (error) throw error;
-  return data || [];
+  return normalizeRpcTableRows(data);
 }
 
 async function promoverAdmin(userId) {
@@ -601,6 +608,7 @@ function criticidadeBadgeHtml(c) {
 }
 
 window.AdminPortal = {
+  CLIENT_ID,
   login, logout, signOutLocal, obterSessao, obterUser, obterMeuRole, obterMeuClient,
   obterAdesaoPortalAtual, sincronizarAdesaoPortalSeAutenticado, registarProprietario,
   verificarAdmin, verificarAcesso,

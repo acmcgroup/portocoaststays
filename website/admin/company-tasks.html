@@ -72,16 +72,35 @@
 
   if (role === 'admin') {
     const ownerSel = document.getElementById('owner-select');
+    const portalClient = AdminPortal.CLIENT_ID || 'portocoaststays';
     ownerSel.style.display = '';
     try {
       const users = await AdminPortal.listarUtilizadores();
-      users.filter(u => u.client === 'portocoaststays').forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = `${u.nome || u.email} (${u.role === 'admin' ? 'admin' : 'proprietário'})`;
-        ownerSel.appendChild(opt);
-      });
-    } catch(_) {}
+      users
+        .filter(u => !u.client || u.client === portalClient)
+        .forEach(u => {
+          const opt = document.createElement('option');
+          opt.value = u.id;
+          opt.textContent = `${u.nome || u.email} (${u.role === 'admin' ? 'admin' : 'proprietário'})`;
+          ownerSel.appendChild(opt);
+        });
+      if (!ownerSel.options.length || ownerSel.options.length === 1) {
+        AdminPortal.toast('Não foi possível listar membros do portal (lista vazia). Verifique permissões ou a consola.', 'error');
+      }
+      const preferEmail = 'afonso@dappio.pt';
+      const preferId = me?.email && me.email.toLowerCase() === preferEmail ? me.id : null;
+      const pick = preferId && ownerSel.querySelector(`option[value="${preferId}"]`)
+        ? preferId
+        : (ownerSel.options[1] ? ownerSel.options[1].value : null);
+      if (pick) {
+        ownerSel.value = pick;
+        targetOwnerId = pick;
+        await loadStatuses();
+      }
+    } catch (e) {
+      console.warn('[company-tasks] listarUtilizadores:', e);
+      AdminPortal.toast('Erro ao listar proprietários: ' + (e.message || e), 'error');
+    }
     ownerSel.addEventListener('change', async () => {
       targetOwnerId = ownerSel.value || null;
       if (targetOwnerId) await loadStatuses();
