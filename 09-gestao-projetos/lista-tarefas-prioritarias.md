@@ -80,6 +80,226 @@ O **número de registo** (ex.: `AL/Porto/…`) **não é emitido pelo cliente à
 | 3.7 | **Registar AL junto da Câmara para cobrança/liquidação de taxa turística** | 🔴 | [A] | P (G) | Porto e Matosinhos: processos distintos; G executa com mandato |
 | 3.8 | Incluir linha de taxa turística na faturação ao hóspede (fatura separada ou em separado) | 🟠 | [A] | G | Não pode ser incluída no IVA de dormida; é uma taxa municipal distinta |
 
+### 3. Comunicações a Entidades — Detalhe por Tarefa
+
+---
+
+#### 3.2 — Registar número RNAL nos listings
+
+**O que é e porquê**
+O número RNAL (ex.: `AL/Porto/12345` ou `AL/Matosinhos/12345`) é a licença de operação emitida pelo Turismo de Portugal aquando do registo via ePortugal. Airbnb e Booking.com são obrigados por lei a exibi-lo em cada anúncio. A ausência pode resultar em suspensão do listing ou coima aplicada ao explorador.
+
+**Passo a passo — Airbnb**
+1. Aceder a [airbnb.com/hosting](https://www.airbnb.com/hosting) → seleccionar o anúncio
+2. Editar → secção "Regulamentação e licenciamento" (ou "Regulatory compliance")
+3. Campo "Número de registo local" → inserir `AL/Porto/XXXXX` exactamente como aparece no certificado RNAL
+4. Guardar — aparece publicamente no listing abaixo do nome do espaço
+
+**Passo a passo — Booking.com**
+1. Aceder à Extranet → [admin.booking.com](https://admin.booking.com)
+2. Property → Property page → secção "Legal information" ou "Tax & Registration"
+3. Campo "Registration number" / "Número de registo" → inserir o número RNAL
+4. Guardar e verificar que aparece na listagem pública
+
+**Notas operacionais**
+- O formato deve ser idêntico ao certificado; não inventar variações
+- Reguladores municipais (Porto, Matosinhos) cruzam dados das plataformas com o RNAL
+- Se o número ainda não estiver atribuído, preencher campo com "Registo pendente — submetido em DD/MM/AAAA"
+
+**Links úteis**
+- [Airbnb — Regulatory compliance help](https://www.airbnb.com/help/article/2273)
+- [Booking.com Extranet](https://admin.booking.com)
+- [Consultar número RNAL atribuído — ePortugal](https://eportugal.gov.pt/servicos/consultar-registo-nacional-de-alojamento-local)
+
+---
+
+#### 3.3 — Comunicar dados de hóspedes ao SIBA
+
+**O que é e porquê**
+O SIBA (Sistema de Informação de Boletins de Alojamento) é o portal da AIMA (ex-SEF) onde os exploradores de AL submetem os boletins de alojamento de cada hóspede. Obrigação legal por Decreto-Lei n.º 13/2021. Prazo: 3 dias úteis após check-in. Falha resulta em coima entre €300 e €3.500.
+
+**Dados obrigatórios por hóspede**
+| Campo | Detalhe |
+|---|---|
+| Nome completo | Conforme documento de identificação |
+| Nacionalidade | País de emissão do documento |
+| Tipo de documento | Passaporte, BI, Cartão de Cidadão, etc. |
+| Número do documento | Exacto, sem espaços |
+| Data de nascimento | DD/MM/AAAA |
+| País de residência | Pode diferir da nacionalidade |
+| Data de check-in | |
+| Data de check-out | |
+
+**Método 1 — Portal manual (1–3 imóveis)**
+1. Criar conta em [siba.sef.pt](https://siba.sef.pt) com os dados do titular explorador (NIF + RNAL)
+2. Após confirmação de check-in, aceder ao portal SIBA
+3. "Novo boletim" → preencher dados de cada hóspede → submeter
+4. Guardar o recibo/comprovativo por reserva (7 anos)
+
+**Método 2 — API SOAP automatizada (recomendado)**
+- Endpoint: `POST https://siba.sef.pt/baws/boletinsalojamento.asmx`
+- WSDL: `https://siba.sef.pt/baws/boletinsalojamento.asmx?WSDL`
+- Campos principais: `UnidadeHoteleira` (NIF do explorador), `Estabelecimento` (int, atribuído no registo SIBA), `ChaveAcesso` (12 caracteres, gerada no portal SIBA), `Boletins` (XML com dados dos hóspedes conforme schema do WSDL)
+- Implementação sugerida: Netlify/Vercel Function (~50 linhas) com credenciais em variáveis de ambiente, triggered por webhook do PMS no check-in
+- Detalhe técnico completo: `03-operacoes/siba-recolha-dados.md`
+
+**Fluxo de recolha de dados dos hóspedes**
+1. PMS envia mensagem automática de confirmação com formulário de dados
+2. Hóspede preenche antes da chegada (template disponível em `03-operacoes/siba-recolha-dados.md`)
+3. Dados chegam ao PMS → webhook dispara → API SIBA submete boletim
+4. Fallback manual se dados não recebidos: contactar hóspede 24h antes do check-in
+
+**Links úteis**
+- [SIBA — Portal AIMA](https://siba.sef.pt)
+- [AIMA (ex-SEF)](https://aima.gov.pt)
+- [Decreto-Lei 13/2021 — Base legal](https://dre.pt/dre/detalhe/decreto-lei/13-2021-157099819)
+
+---
+
+#### 3.4 — Comunicar faturas à AT via e-fatura
+
+**O que é e porquê**
+Todo o rendimento de AL deve gerar uma fatura certificada AT e ser transmitida ao sistema e-fatura. Obrigação da Lei n.º 51-B/2021 e CIVA. O InvoiceXpress transmite automaticamente via webservice AT após cada emissão. Falha de comunicação = coima + risco de inspecção fiscal.
+
+**Configuração inicial (uma vez)**
+1. Aceder a [invoicexpress.com](https://www.invoicexpress.com) → Configurações → Empresa
+2. Inserir NIF do titular explorador, nome legal, morada fiscal
+3. Configurações → Integração AT (e-fatura):
+   - Inserir credenciais do Portal das Finanças (utilizador AT + senha de webservice — diferente da senha de login)
+   - Activar transmissão automática
+4. Criar série de facturas certificada AT
+5. Criar produto "Alojamento" com IVA 6% (taxa reduzida)
+6. Criar produto "Taxa Turística Municipal" com IVA Isento (ver 3.8)
+
+**Fluxo por reserva**
+1. PMS fecha reserva → webhook → InvoiceXpress emite factura
+2. InvoiceXpress transmite automaticamente à AT (código AT gerado na factura)
+3. Factura enviada ao hóspede por e-mail
+
+**Verificação mensal (até dia 5)**
+1. Aceder a [faturas.portaldasfinancas.gov.pt](https://faturas.portaldasfinancas.gov.pt)
+2. Verificar "Faturas comunicadas" do mês anterior
+3. Cruzar com relatório do PMS — nenhuma reserva sem factura correspondente
+4. Verificar se há erros de transmissão no InvoiceXpress (painel "Integrações")
+
+**Obrigações específicas**
+- Hóspede pede NIF na factura: incluir em facturas no prazo de 5 dias após emissão
+- Factura anónima: emitir para "Consumidor Final" se hóspede não fornecer NIF
+- IVA 6%: aplicado sobre o valor da dormida (excluindo taxa turística)
+
+**Links úteis**
+- [InvoiceXpress](https://www.invoicexpress.com)
+- [Portal e-fatura AT](https://faturas.portaldasfinancas.gov.pt)
+- [Portal das Finanças — Credenciais webservice](https://www.portaldasfinancas.gov.pt/at/html/index.html)
+- [CIVA — Art. 18.º taxa reduzida alojamento](https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/civa_rep/Pages/iva18.aspx)
+
+---
+
+#### 3.6 — Notificar Câmara de alterações relevantes no RNAL
+
+**O que é e porquê**
+Qualquer alteração relevante ao imóvel ou ao registo RNAL deve ser comunicada à Câmara Municipal no prazo de 10 dias após a ocorrência (Lei n.º 62/2018, art. 6.º). Omissão pode levar ao cancelamento do RNAL.
+
+**Situações que obrigam a notificação**
+| Alteração | Exemplo |
+|---|---|
+| Capacidade máxima | Adicionar cama extra, reformar quarto |
+| Titular / explorador | Mudança de proprietário ou empresa gestora como titular |
+| Tipo de AL | Apartamento → Moradia, ou alteração de categoria |
+| Morada / fracção | Numeração alterada, divisão de fracção |
+| Cessação de actividade | Saída do mercado AL permanente ou temporária |
+
+**Passo a passo**
+1. Aceder a [ePortugal.gov.pt](https://eportugal.gov.pt) → autenticar com Chave Móvel Digital do titular
+2. Pesquisar "Alteração de dados do Alojamento Local"
+3. Seleccionar o número RNAL a alterar
+4. Preencher os novos dados e submeter
+5. Guardar comprovativo de submissão
+6. Comunicar também à Câmara Municipal por e-mail ou plataforma local (Porto: balcão online CMP; Matosinhos: serviços municipais)
+
+**Quem faz**
+- Titular (P) obrigatoriamente ou com mandato escrito para a gestora (G)
+- G prepara documentação e acompanha o processo se mandatada
+
+**Links úteis**
+- [ePortugal — Alteração de AL](https://eportugal.gov.pt/servicos/alterar-alojamento-local)
+- [Câmara Municipal do Porto — Balcão Online](https://balcao.cm-porto.pt)
+- [Câmara Municipal de Matosinhos](https://www.cm-matosinhos.pt)
+- [Lei 62/2018 — Regime AL](https://dre.pt/dre/detalhe/lei/62-2018-116382765)
+
+---
+
+#### 3.7 — Registar AL junto da Câmara para taxa turística
+
+**O que é e porquê**
+Além do RNAL nacional, cada município onde existe um AL requer registo específico para efeitos de cobrança e liquidação da taxa turística municipal. Porto e Matosinhos têm processos distintos. Sem registo, a cobrança da taxa ao hóspede não é legítima e o explorador fica em incumprimento municipal.
+
+**Porto — SIGTUR**
+1. Aceder ao portal SIGTUR da CMP: [portaturistica.cm-porto.pt](https://portaturistica.cm-porto.pt)
+2. Criar conta com NIF do titular e dados do imóvel
+3. Registar cada alojamento AL individualmente (número RNAL + morada + capacidade)
+4. Após validação, receber acesso ao módulo de liquidação mensal
+5. Liquidação: até dia 15 do mês seguinte; declaração de noites cobradas × taxa aplicável
+6. Taxa: €2/noite/hóspede (≥13 anos), máximo 7 noites consecutivas por estadia
+7. Pagamento: referência MB gerada no portal ou débito directo
+
+**Matosinhos**
+1. Contactar Câmara Municipal de Matosinhos — Divisão de Turismo: [cm-matosinhos.pt](https://www.cm-matosinhos.pt)
+2. Solicitar formulário de registo para taxa turística (processo pode ser presencial ou via e-mail para turismo@cm-matosinhos.pt)
+3. Submeter: NIF titular, RNAL, morada imóvel, capacidade, contacto
+4. Taxa: €1/noite/hóspede; periodicidade de liquidação a confirmar (mensal ou trimestral)
+5. Confirmar anualmene se houve alteração ao Regulamento Municipal
+
+**Notas comuns**
+- O titular legal do registo municipal deve ser o mesmo que consta no RNAL
+- Com mandato, a gestora pode fazer a gestão operacional (declarações + pagamentos)
+- Conservar comprovativos de liquidação 5 anos (fiscalização municipal)
+
+**Links úteis**
+- [Portal Taxa Turística Porto — SIGTUR](https://portaturistica.cm-porto.pt)
+- [Regulamento Taxa Turística Porto](https://www.cm-porto.pt/municipio/regulamentos-e-posturas)
+- [Câmara Municipal de Matosinhos — Turismo](https://www.cm-matosinhos.pt/municipio/turismo)
+
+---
+
+#### 3.8 — Incluir taxa turística na faturação ao hóspede
+
+**O que é e porquê**
+A taxa turística é uma taxa municipal, não um imposto sobre o consumo. Não está sujeita a IVA. Deve constar numa linha separada da factura — nunca agrupada com o valor da dormida (que tem IVA 6%). Misturar as duas = incumprimento fiscal (AT) e legal (municípios).
+
+**Estrutura correcta de uma factura AL**
+
+| Linha | Descrição | Quantidade | Preço unit. | IVA | Total |
+|---|---|---|---|---|---|
+| 1 | Alojamento — X noites | X | €YY | 6% | €ZZ |
+| 2 | Taxa Turística Municipal | noites × hóspedes (máx. 7) | €2 ou €1 | Isento | €WW |
+| **Total** | | | | | **€ZZ + €WW** |
+
+**Configuração no InvoiceXpress**
+1. Ir a Produtos/Serviços → "Novo produto"
+2. Nome: `Taxa Turística Municipal — Porto` (ou Matosinhos)
+3. Categoria de IVA: **Isento** (Artigo 9.º CIVA ou isenção municipal)
+4. Preço unitário: €2,00 (Porto) ou €1,00 (Matosinhos)
+5. Unidade: "noite/hóspede"
+6. Guardar e associar ao template de factura de reserva
+
+**Cálculo da quantidade**
+- `quantidade = número de noites × número de hóspedes adultos (≥13 anos)`
+- Limite: máximo 7 noites por estadia (mesmo que a reserva seja mais longa)
+- Exemplo: 3 noites × 2 adultos = 6 unidades × €2 = €12 taxa turística em Porto
+
+**Fluxo automático PMS → InvoiceXpress**
+- O PMS deve passar: `nights`, `guests_adult_count`, `municipality` ao webhook de facturação
+- InvoiceXpress calcula a linha automaticamente se os campos estiverem mapeados
+- Verificar mapeamento em Configurações → Integrações → PMS
+
+**Links úteis**
+- [InvoiceXpress — Produtos isentos de IVA](https://www.invoicexpress.com/pt/suporte)
+- [Artigo 9.º CIVA — Isenções](https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/civa_rep/Pages/iva9.aspx)
+- [CMP — Regulamento Taxa Turística](https://www.cm-porto.pt/municipio/regulamentos-e-posturas)
+
+---
+
 ### Responsabilidade nos blocos 4–12 (resumo)
 
 | Blocos | Quem lidera | Nota |
