@@ -125,14 +125,14 @@ O **número de registo** (ex.: `AL/Porto/…`) **não é emitido pelo cliente à
 
 | # | Tarefa | Criticidade | Âmbito | Notas |
 |---|--------|-------------|--------|-------|
-| 6.1 | Contratar e configurar PMS (Hostaway recomendado para 1–20 un.) | 🔴 | [G] | Alternativa inicial: Smoobu (~25€/mês); versão gratuita até 1 unidade |
-| 6.2 | Ligar Airbnb ao PMS via Channel Manager | 🔴 | [A] | Evita double bookings; sincroniza calendário e preços |
+| 6.1 | Contratar e configurar PMS (Hostaway recomendado para 1–20 un.) | 🔴 | [G] | **Smoobu gratuito até 1 imóvel; €25/mês a partir de 2** — cobre channel sync, mensagens, limpeza, relatórios. Holidu NÃO substitui PMS (é OTA com comissão, não channel manager). Construir channel sync próprio não vale o custo; SIBA e mensagens podem ser substituídos |
+| 6.2 | Ligar Airbnb ao PMS via Channel Manager | 🔴 | [A] | Evita double bookings; iCal tem 15-60 min delay (risco real); channel sync em tempo real requer PMS |
 | 6.3 | Ligar Booking.com ao PMS via Channel Manager | 🔴 | [A] | Idem |
 | 6.4 | Configurar sequência de 9 mensagens automáticas no PMS | 🔴 | [A] | De confirmação de reserva até pedido de review; configurar 1x |
 | 6.5 | Configurar notificação automática de limpeza pós-checkout (PMS → WhatsApp) | 🔴 | [A] | Sem isto, a coordenação de limpeza é manual e falha |
 | 6.6 | Configurar Pricelabs com preço base, mínimo, máximo e regras sazonais | 🔴 | [A] | +20–30% de receita vs preço fixo; rever semanalmente |
 | 6.7 | Configurar InvoiceXpress: NIF, IVA 6%, integração PMS, e-fatura AT | 🔴 | [G] | Fatura emitida automaticamente por reserva |
-| 6.8 | **Configurar fluxo automático de recolha de dados SIBA** (Chekin ou Akia → PMS → SIBA) | 🔴 | [G] | Trigger na confirmação de reserva → link de check-in online → upload documento → submissão automática ao SIBA em ≤3 dias úteis; detalhe completo em `03-operacoes/siba-recolha-dados.md` |
+| 6.8 | **Configurar fluxo automático de recolha de dados SIBA** (Chekin ou Akia → PMS → SIBA) | 🔴 | [G] | Trigger na confirmação de reserva → link de check-in online → upload documento → submissão automática ao SIBA em ≤3 dias úteis. **Credenciais necessárias no portal SIBA**: NIF da Unidade Hoteleira + Código de Estabelecimento + Chave de Autenticação (12 dígitos) + modo "integração web service SEF-SIBA" ativo. Chekin ~€5/mês ou construir chamada web service direto (2-3 dias dev). Holidu tem SIBA nativo mas é OTA (cobra comissão), não usar só para SIBA. Detalhe: `03-operacoes/siba-recolha-dados.md` |
 | 6.8a | Inserir templates EN/PT de pedido de dados nos templates PMS (fallback para reservas sem Chekin) | 🟠 | [G] | Templates prontos em `03-operacoes/siba-recolha-dados.md`; usar enquanto Chekin não está ativo |
 | 6.9 | Criar guia digital do apartamento (código porta, WiFi, eletrodomésticos, regras, emergências) | 🔴 | [A] | Notion, PDF ou funcionalidade nativa do PMS; enviado automaticamente D-1 |
 | 6.10 | Criar grupo WhatsApp de operações (gestora + equipa limpeza) | 🔴 | [A] | Canal de controlo fotográfico pós-limpeza |
