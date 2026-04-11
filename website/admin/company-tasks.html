@@ -85,9 +85,10 @@
     ownerSel.addEventListener('change', async () => {
       targetOwnerId = ownerSel.value || null;
       if (targetOwnerId) await loadStatuses();
-      else { statuses = {}; document.getElementById('tasks-container').innerHTML = '<div class="alert alert-info">Selecione um proprietário para ver as suas tasks globais.</div>'; }
+      else { statuses = {}; renderTasks(); }
     });
     document.getElementById('breadcrumb').textContent = 'Empresa / Tasks Globais';
+    renderTasks();
   } else {
     targetOwnerId = me?.id;
     await loadStatuses();
@@ -101,7 +102,11 @@
       statuses = {};
       raw.forEach(s => { statuses[s.task_id] = s.status; });
       renderTasks();
-    } catch(e) { AdminPortal.toast('Erro: ' + e.message, 'error'); }
+    } catch(e) {
+      AdminPortal.toast('Erro: ' + e.message, 'error');
+      document.getElementById('tasks-container').innerHTML =
+        '<div class="alert alert-danger">Não foi possível carregar as tasks. Verifique a consola / rede ou as permissões na base de dados.</div>';
+    }
   }
 
   function filtered() {

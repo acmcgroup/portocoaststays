@@ -124,10 +124,11 @@ async function obterUser() {
   return user;
 }
 
+/** Papel neste portal (CLIENT_ID), alinhado com profile_clients / RPCs — não uses profiles.role global. */
 async function obterMeuRole() {
-  const { data, error } = await _sb.rpc('obter_meu_role');
-  if (error) { console.error('[Admin] obter_meu_role failed:', error.message); return 'user'; }
-  return data || 'user';
+  const adesao = await obterAdesaoPortalAtual();
+  if (adesao && adesao.status === 'active') return adesao.role || 'user';
+  return 'user';
 }
 
 async function obterMeuClient() {
