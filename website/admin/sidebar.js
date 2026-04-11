@@ -34,7 +34,6 @@ function renderSidebar(activePage) {
   return `
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <img class="sidebar-logo-img" src="/assets/images/logo.svg" alt="Porto Coast Stays"/>
         <div class="sidebar-logo-text">
           <span class="sidebar-logo-name">Porto Coast Stays</span>
           <div class="sidebar-logo-sub">Admin</div>

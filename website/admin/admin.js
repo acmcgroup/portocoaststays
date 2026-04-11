@@ -188,6 +188,8 @@ function authErrorIsDuplicateEmail(msg) {
 // ── Users ─────────────────────────────────────────────────────
 
 async function listarUtilizadores() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) throw new Error('Sessão inválida. Volte a entrar.');
   const { data, error } = await _sb.rpc('listar_utilizadores_do_portal', { p_client: CLIENT_ID });
   if (error) throw error;
   return data || [];
