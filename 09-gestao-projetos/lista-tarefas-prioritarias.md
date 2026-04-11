@@ -132,7 +132,7 @@ O **número de registo** (ex.: `AL/Porto/…`) **não é emitido pelo cliente à
 | 6.5 | Configurar notificação automática de limpeza pós-checkout (PMS → WhatsApp) | 🔴 | [A] | Sem isto, a coordenação de limpeza é manual e falha |
 | 6.6 | Configurar Pricelabs com preço base, mínimo, máximo e regras sazonais | 🔴 | [A] | +20–30% de receita vs preço fixo; rever semanalmente |
 | 6.7 | Configurar InvoiceXpress: NIF, IVA 6%, integração PMS, e-fatura AT | 🔴 | [G] | Fatura emitida automaticamente por reserva |
-| 6.8 | **Configurar fluxo automático de recolha de dados SIBA** (Chekin ou Akia → PMS → SIBA) | 🔴 | [G] | Trigger na confirmação de reserva → link de check-in online → upload documento → submissão automática ao SIBA em ≤3 dias úteis. **Credenciais necessárias no portal SIBA**: NIF da Unidade Hoteleira + Código de Estabelecimento + Chave de Autenticação (12 dígitos) + modo "integração web service SEF-SIBA" ativo. Chekin ~€5/mês ou construir chamada web service direto (2-3 dias dev). Holidu tem SIBA nativo mas é OTA (cobra comissão), não usar só para SIBA. Detalhe: `03-operacoes/siba-recolha-dados.md` |
+| 6.8 | **Configurar fluxo automático de recolha de dados SIBA** (web service próprio ou Chekin) | 🔴 | [G] | **API oficial**: `POST https://siba.sef.pt/baws/boletinsalojamento.asmx` (SOAP). Campos: `UnidadeHoteleira` (NIF), `Estabelecimento` (int), `ChaveAcesso` (12 dígitos), `Boletins` (XML com dados hóspede — confirmar schema no WSDL `?WSDL`). Prazo: ≤3 dias úteis após check-in. Implementação: Netlify Function ~50 linhas, credenciais em env vars, trigger via webhook PMS. Elimina Chekin (€5-60/mês). Detalhe: `03-operacoes/siba-recolha-dados.md` |
 | 6.8a | Inserir templates EN/PT de pedido de dados nos templates PMS (fallback para reservas sem Chekin) | 🟠 | [G] | Templates prontos em `03-operacoes/siba-recolha-dados.md`; usar enquanto Chekin não está ativo |
 | 6.9 | Criar guia digital do apartamento (código porta, WiFi, eletrodomésticos, regras, emergências) | 🔴 | [A] | Notion, PDF ou funcionalidade nativa do PMS; enviado automaticamente D-1 |
 | 6.10 | Criar grupo WhatsApp de operações (gestora + equipa limpeza) | 🔴 | [A] | Canal de controlo fotográfico pós-limpeza |
@@ -145,7 +145,7 @@ O **número de registo** (ex.: `AL/Porto/…`) **não é emitido pelo cliente à
 
 | # | Tarefa | Criticidade | Âmbito | Notas |
 |---|--------|-------------|--------|-------|
-| 7.1 | Integrar Chekin ou Akia (verificação de identidade + SIBA automático) | 🟠 | [G] | ~€5–15/mês; obrigatório a partir de 3 imóveis para escala |
+| 7.1 | ~~Integrar Chekin ou Akia (verificação de identidade + SIBA automático)~~ — substituído por web service próprio (6.8) | 🟢 | [G] | SIBA resolvido com Netlify Function direta ao `siba.sef.pt`. Chekin/Akia só se necessário para verificação de identidade (KYC) por exigência de seguro ou escala >10 imóveis |
 | 7.2 | Ativar dashboard em tempo real para proprietários (acesso Hostaway) | 🟡 | [G] | Argumento de venda; transparência total |
 | 7.3 | Configurar Zoho Projects (gestão de tarefas via Supabase edge function) | 🟡 | [G] | Já existe `controller.py`; sincronizar tarefas B1–B6 |
 | 7.4 | Ativar VRBO como 3.ª plataforma de distribuição | 🟡 | [G] | Fase 2; ligar ao PMS via Channel Manager |
