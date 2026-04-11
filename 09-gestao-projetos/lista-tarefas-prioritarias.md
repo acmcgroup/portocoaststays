@@ -40,6 +40,7 @@ O **número de registo** (ex.: `AL/Porto/…`) **não é emitido pelo cliente à
 | 1.3 | Comunicar registo RNAL à Câmara Municipal (Porto ou Matosinhos) | 🔴 | [A] | P (G) | Obrigação do titular; G pode tratar com mandato escrito. Prazo: 10 dias após registo |
 | 1.4 | Instalar placa identificativa AL na porta/entrada | 🔴 | [A] | G | Execução G; custo conforme contrato com P. 20×14 cm, metálica, com número RNAL; ~€15–30 |
 | 1.5 | Contratar seguro responsabilidade civil (mínimo €75k cobertura) | 🔴 | [A] | P | Titular / imóvel; G pode recomendar corretor. Fidelidade / Tranquilidade / Generali; ~€300–600/ano c/ multirriscos |
+| 1.5a | **Entregar comprovativo do seguro RC via ePortugal** (após atribuição do número RNAL) | 🔴 | [A] | P (G) | Passo separado e obrigatório; repetir sempre que renovar ou alterar o seguro. Serviço: gov.pt → "Entregar comprovativo de seguro do Alojamento Local" |
 | 1.6 | Registar livro de reclamações eletrónico em livroreclamacoes.pt | 🔴 | [A] | P (G) | Entidade do estabelecimento = titular; G pode executar setup |
 | 1.7 | Colocar extintor de incêndio (verificação anual) | 🔴 | [A] | G | Obrigatório por lei; verificar validade em cada limpeza |
 | 1.8 | Colocar kit de primeiros socorros básico | 🔴 | [A] | G | Obrigatório por lei |
@@ -197,7 +198,10 @@ O **número de registo** (ex.: `AL/Porto/…`) **não é emitido pelo cliente à
 | 10.11 | Renovar seguro multirriscos + RC | 🔴 | Anual | [A] | P | G pode lembrar e coordenar |
 | 10.12 | Verificar extintor (validade) | 🔴 | Anual | [A] | G | |
 | 10.13 | Declarar rendimentos AL (IRS Categoria B) | 🔴 | Anual | [G] | P+C | |
-| 10.14 | Atualizar dados RNAL se houve alterações no imóvel | 🟠 | Quando aplicável | [A] | P (G) | Titular pede alteração; G apoia |
+| 10.14 | Atualizar dados RNAL se houve alterações no imóvel | 🟠 | Quando aplicável | [A] | P (G) | Titular pede alteração; G apoia. Prazo: 10 dias após a ocorrência |
+| 10.15 | **Entregar comprovativo de exercício de atividade AL** (declaração contributiva IRS/IRC/IVA + formulário gov.pt) | 🔴 | Anual | [A] | P (G) | Obrigação do titular; se não submetida, Câmara pode cancelar o RNAL. **Isenção**: imóvel em habitação própria e permanente com ≤120 noites/ano — confirmar por imóvel. Serviço: gov.pt → "Enviar o comprovativo do exercício da atividade de alojamento local" |
+| 10.16 | **Renovar entrega de comprovativo de seguro RC** sempre que renovar ou alterar o seguro | 🔴 | Anual (renovação) | [A] | P (G) | Serviço: gov.pt → "Entregar comprovativo de seguro do Alojamento Local" |
+| 10.17 | **Comunicar cessação de atividade AL** se imóvel sair do AL | 🔴 | Quando aplicável | [A] | P (G) | Obrigação legal do titular; via gov.pt → "Alojamento local cessação da atividade" |
 
 ---
 
@@ -255,4 +259,4 @@ Para os **2 imóveis próprios** (T0 Porto e T1 Matosinhos), por ordem de desblo
 
 ---
 
-*Última atualização: 2026-04-08 | Fonte: cruzamento de `01-plano-negocio`, `03-operacoes`, `04-tecnologia`, `06-legal`, comunidade AL e análise competitiva `analise-mystay.md`; alinhado com plano RNAL/SIBA (titular).*
+*Última atualização: 2026-04-11 | Fonte: cruzamento de `01-plano-negocio`, `03-operacoes`, `04-tecnologia`, `06-legal`, comunidade AL e análise competitiva `analise-mystay.md`; alinhado com plano RNAL/SIBA (titular). Complementado com serviços gov.pt AL (sessão autenticada 2026-04-11): comprovativo de seguro, comprovativo de exercício de atividade, alteração de dados, cessação.*
