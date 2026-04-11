@@ -151,6 +151,9 @@ O **número de registo** (ex.: `AL/Porto/…`) **não é emitido pelo cliente à
 | 7.4 | Ativar VRBO como 3.ª plataforma de distribuição | 🟡 | [G] | Fase 2; ligar ao PMS via Channel Manager |
 | 7.5 | **Motor de reservas diretas no website** (0% comissão OTA) | 🟡 | [G] | Antecipar de Fase 3 para Fase 2; avaliar Lodgify, Hostaway Pages ou Stripe direto; a MyStay inclui este canal em TODOS os planos incluindo o mais barato |
 | 7.6 | **AI chatbot para suporte a hóspedes** (GuestAgent equivalente) | 🟡 | [G] | Avaliar Akia AI, Hostaway AI ou Tidio; necessário antes dos 3–5 imóveis para manter SLA <10 min sem contratar assistente |
+| 7.7 | **Configurar iCal sync como interim channel manager** (grátis, disponível agora) | 🟠 | [G] | Airbnb → Calendário → Exportar iCal URL → importar no Booking.com. Delay ~15-60 min. Reduz risco de double booking enquanto PMS não está ativo. Substituir pelo channel manager do Smoobu logo que ativo |
+| 7.8 | Research: Airbnb Connectivity Partner Program (self-build Fase 3 / SaaS) | 🟡 | [G] | https://www.airbnb.com/partner — programa para ISVs/PMS; 3-12 meses de certificação; ~400-600h dev. Para 1-2 imóveis usar Smoobu. Relevante quando PCS gerir 15+ imóveis ou oferecer PMS como SaaS |
+| 7.9 | Research: Booking.com Connectivity Partner Program (self-build Fase 3 / SaaS) | 🟡 | [G] | https://partnerhelp.booking.com — REST API para certificados; processo similar ao Airbnb. Alternativa: Rentals United como middleware certificado. Avaliar na Fase 3 |
 
 ---
 
@@ -259,4 +262,4 @@ Para os **2 imóveis próprios** (T0 Porto e T1 Matosinhos), por ordem de desblo
 
 ---
 
-*Última atualização: 2026-04-11 | Fonte: cruzamento de `01-plano-negocio`, `03-operacoes`, `04-tecnologia`, `06-legal`, comunidade AL e análise competitiva `analise-mystay.md`; alinhado com plano RNAL/SIBA (titular). Complementado com serviços gov.pt AL (sessão autenticada 2026-04-11): comprovativo de seguro, comprovativo de exercício de atividade, alteração de dados, cessação.*
+*Última atualização: 2026-04-11 | Fonte: cruzamento de `01-plano-negocio`, `03-operacoes`, `04-tecnologia`, `06-legal`, comunidade AL e análise competitiva `analise-mystay.md`; alinhado com plano RNAL/SIBA (titular). Complementado com serviços gov.pt AL (2026-04-11), SIBA SOAP API (`siba.sef.pt/baws`), e análise build-vs-buy channel manager (Airbnb/Booking.com Partner Programs).*

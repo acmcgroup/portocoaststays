@@ -287,7 +287,17 @@ img { display: block; max-width: 100%; }
 .btn-comments-toggle { font-size: 0.78rem; color: var(--admin-text-muted); background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: var(--admin-trans); display: flex; align-items: center; gap: 4px; }
 .btn-comments-toggle:hover { background: var(--admin-surface2); color: var(--admin-text); }
 
-.task-notes { font-size: 0.78rem; color: var(--admin-text-muted); margin-top: 5px; font-style: italic; }
+.task-notes { font-size: 0.78rem; color: var(--admin-text-muted); margin-top: 5px; font-style: italic; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+/* ── Task detail modal ── */
+.task-detail-btn { background: none; border: none; color: var(--admin-primary); font-size: .78rem; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; font-family: inherit; transition: var(--admin-trans); flex-shrink: 0; }
+.task-detail-btn:hover { opacity: .7; }
+.task-modal-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--admin-text-muted); margin-bottom: 6px; }
+.task-modal-notes { font-size: .84rem; line-height: 1.75; color: var(--admin-text); word-break: break-word; margin-bottom: 4px; }
+.task-modal-notes a { color: var(--admin-primary); text-decoration: underline; text-underline-offset: 2px; word-break: break-all; }
+.task-modal-notes strong { font-weight: 600; color: var(--admin-text); }
+.task-modal-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px 20px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--admin-border); }
+.task-modal-value { font-size: .84rem; color: var(--admin-text); font-weight: 500; line-height: 1.4; }
 
 /* ── Comment thread ── */
 .task-comments-wrap { margin-top: 12px; display: none; }

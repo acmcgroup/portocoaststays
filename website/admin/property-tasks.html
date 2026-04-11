@@ -134,6 +134,14 @@
     }).join('');
 
     // Wire events
+    container.querySelectorAll('.task-detail-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const t = templates.find(x => x.id === btn.dataset.taskId);
+        if (t) openTaskModal(t);
+      });
+    });
+
     container.querySelectorAll('.task-status-select').forEach(sel => {
       sel.addEventListener('change', async (e) => {
         const taskId   = e.target.dataset.taskId;
@@ -224,6 +232,7 @@
             <option value="completed"   ${st === 'completed'   ? 'selected' : ''}>Concluído</option>
             <option value="blocked"     ${st === 'blocked'     ? 'selected' : ''}>Bloqueado</option>
           </select>
+          <button class="task-detail-btn" data-task-id="${t.id}">ℹ Ver detalhes</button>
           <button class="btn-comments-toggle" data-task-id="${t.id}" aria-expanded="false">
             💬 Comentários
           </button>
@@ -267,8 +276,67 @@
   document.getElementById('filter-crit').addEventListener('change', renderTasks);
   document.getElementById('filter-status').addEventListener('change', renderTasks);
 
+  /* ── Task detail modal ── */
+  function openTaskModal(t) {
+    document.getElementById('tmodal-id').textContent = '#' + t.id;
+    document.getElementById('tmodal-title').textContent = t.description;
+    document.getElementById('tmodal-badges').innerHTML =
+      AdminPortal.criticidadeBadgeHtml(t.criticidade) +
+      AdminPortal.taskStatusBadgeHtml(statuses[t.id] || 'pending');
+    document.getElementById('tmodal-meta-row').textContent =
+      `Resp: ${t.resp}  ·  Secção ${t.section_num} — ${t.section_name}`;
+    const ns = document.getElementById('tmodal-notes-section');
+    const ne = document.getElementById('tmodal-notes');
+    if (t.notes) { ns.style.display = ''; ne.innerHTML = formatTaskNotes(t.notes); }
+    else { ns.style.display = 'none'; }
+    document.getElementById('tmodal-meta-grid').innerHTML = `
+      <div><div class="task-modal-label">Responsável</div><div class="task-modal-value">${AdminPortal.escapeHtml(t.resp)}</div></div>
+      <div><div class="task-modal-label">Âmbito</div><div class="task-modal-value">${t.ambito === 'A' ? 'Por imóvel [A]' : 'Global [G]'}</div></div>
+      <div><div class="task-modal-label">Secção</div><div class="task-modal-value">${t.section_num}. ${AdminPortal.escapeHtml(t.section_name)}</div></div>
+      <div><div class="task-modal-label">Estado</div><div class="task-modal-value">${AdminPortal.taskStatusBadgeHtml(statuses[t.id] || 'pending')}</div></div>`;
+    document.getElementById('task-detail-modal').removeAttribute('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function formatTaskNotes(raw) {
+    return AdminPortal.escapeHtml(raw)
+      .replace(/\n/g, '<br>')
+      .replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+      .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  }
+  function closeTaskModal() {
+    document.getElementById('task-detail-modal').setAttribute('hidden', '');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('tmodal-close').addEventListener('click', closeTaskModal);
+  document.getElementById('tmodal-backdrop').addEventListener('click', closeTaskModal);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTaskModal(); });
+
   await init();
 })();
 </script>
+
+<div id="task-detail-modal" class="admin-modal" hidden>
+  <div class="admin-modal__backdrop" id="tmodal-backdrop"></div>
+  <div class="admin-modal__dialog" style="max-width:660px;max-height:min(92vh,700px)">
+    <div class="admin-modal__header">
+      <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="task-item-id" id="tmodal-id" style="font-size:.8rem;padding-top:0"></span>
+          <div id="tmodal-badges" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+        </div>
+        <h2 class="admin-modal__title" id="tmodal-title"></h2>
+        <div id="tmodal-meta-row" style="font-size:.78rem;color:var(--admin-text-muted)"></div>
+      </div>
+      <button class="admin-modal__close" id="tmodal-close">✕</button>
+    </div>
+    <div class="admin-modal__body" style="padding:18px 20px 22px;overflow-y:auto;flex:1">
+      <div id="tmodal-notes-section">
+        <div class="task-modal-label">Notas &amp; Detalhes</div>
+        <div class="task-modal-notes" id="tmodal-notes"></div>
+      </div>
+      <div class="task-modal-meta-grid" id="tmodal-meta-grid"></div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
