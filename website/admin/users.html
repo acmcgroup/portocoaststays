@@ -51,7 +51,7 @@
 <script>
 (async () => {
   'use strict';
-  const session = await initSidebar('users', true);
+  const session = await initSidebar('users', ['admin']);
   if (!session) return;
 
   const me = await AdminPortal.obterUser();

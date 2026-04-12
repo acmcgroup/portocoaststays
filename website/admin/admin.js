@@ -163,6 +163,18 @@ async function verificarAcesso() {
   return session;
 }
 
+/** UX guard: redirects if the user's role is not in requiredRoles. RLS is the real enforcement. */
+async function verificarRole(requiredRoles = ['admin', 'seller']) {
+  const session = await obterSessao();
+  if (!session) { window.location.href = adminHref('login'); return null; }
+  const role = await obterMeuRole();
+  if (!requiredRoles.includes(role)) {
+    window.location.href = adminHref('login') + '?erro=sem_permissao';
+    return null;
+  }
+  return session;
+}
+
 _sb.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_OUT') window.location.href = adminHref('login');
 });
@@ -212,6 +224,16 @@ async function revogarAdmin(userId) {
   if (error) throw new Error(error.message);
 }
 
+async function promoverSeller(userId) {
+  const { error } = await _sb.rpc('portocoaststays_promover_seller', { target_id: userId });
+  if (error) throw new Error(error.message);
+}
+
+async function revogarSeller(userId) {
+  const { error } = await _sb.rpc('portocoaststays_revogar_seller', { target_id: userId });
+  if (error) throw new Error(error.message);
+}
+
 async function assignClient(userId) {
   const { error } = await _sb.rpc('portocoaststays_assign_client', { target_id: userId });
   if (error) throw new Error(error.message);
@@ -220,7 +242,7 @@ async function assignClient(userId) {
 // ── Posts CRUD ────────────────────────────────────────────────
 
 async function listarPosts({ status = null, pesquisa = '', limite = 50, offset = 0 } = {}) {
-  let q = _sb.from('posts').select('*', { count: 'exact' });
+  let q = _sb.from('posts').select('*', { count: 'exact' }).eq('client', CLIENT_ID);
   if (status)   q = q.eq('status', status);
   if (pesquisa) q = q.or(`pt_title.ilike.%${pesquisa}%,en_title.ilike.%${pesquisa}%,slug_pt.ilike.%${pesquisa}%`);
   q = q.order('created_at', { ascending: false }).range(offset, offset + limite - 1);
@@ -340,7 +362,7 @@ async function uploadMedia(file, opts = {}) {
   if (error) throw new Error(error.message || String(error));
   const { data: urlData } = _sb.storage.from(MEDIA_BUCKET).getPublicUrl(data.path);
   const publicUrl = urlData.publicUrl;
-  const row = { filename: file.name, storage_path: data.path, public_url: publicUrl,
+  const row = { client: CLIENT_ID, filename: file.name, storage_path: data.path, public_url: publicUrl,
     mime_type: file.type || 'application/octet-stream', file_size: file.size };
   if (postId) row.post_id = postId;
   const { error: dbErr } = await _sb.from('media_assets').insert(row);
@@ -350,6 +372,7 @@ async function uploadMedia(file, opts = {}) {
 
 async function listarMedia({ limite = 50, offset = 0, preferPostId = null } = {}) {
   const { data, error } = await _sb.from('media_assets').select('*')
+    .eq('client', CLIENT_ID)
     .order('created_at', { ascending: false }).range(offset, offset + limite - 1);
   if (error) throw error;
   const list = data || [];
@@ -398,7 +421,7 @@ async function enriquecerPropriedadesComPerfilProprietario(rows) {
 }
 
 async function listarPropriedades({ status = null, ownerId = null } = {}) {
-  let q = _sb.from('properties').select('*', { count: 'exact' });
+  let q = _sb.from('properties').select('*', { count: 'exact' }).eq('client', CLIENT_ID);
   if (status)  q = q.eq('status', status);
   if (ownerId) q = q.eq('owner_id', ownerId);
   q = q.order('created_at', { ascending: false });
@@ -435,7 +458,7 @@ async function apagarPropriedade(id) {
 // ── Task templates ────────────────────────────────────────────
 
 async function listarTaskTemplates({ ambito = null } = {}) {
-  let q = _sb.from('task_templates').select('*').order('sort_order', { ascending: true });
+  let q = _sb.from('task_templates').select('*').eq('client', CLIENT_ID).order('sort_order', { ascending: true });
   if (ambito) q = q.eq('ambito', ambito);
   const { data, error } = await q;
   if (error) throw error;
@@ -611,8 +634,8 @@ window.AdminPortal = {
   CLIENT_ID,
   login, logout, signOutLocal, obterSessao, obterUser, obterMeuRole, obterMeuClient,
   obterAdesaoPortalAtual, sincronizarAdesaoPortalSeAutenticado, registarProprietario,
-  verificarAdmin, verificarAcesso,
-  listarUtilizadores, promoverAdmin, revogarAdmin, assignClient,
+  verificarAdmin, verificarAcesso, verificarRole,
+  listarUtilizadores, promoverAdmin, revogarAdmin, promoverSeller, revogarSeller, assignClient,
   listarPosts, obterPost, criarPost, atualizarPost, publicarPost, despublicarPost, apagarPost,
   postTemAlteracoesAposPublicacao, dispararBuildSitePublico, agendarBuildSitePublico,
   uploadMedia, listarMedia, apagarMedia,

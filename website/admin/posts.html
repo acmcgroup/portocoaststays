@@ -69,7 +69,7 @@
 <script>
 (async () => {
   'use strict';
-  const session = await initSidebar('posts', true);
+  const session = await initSidebar('posts', ['admin']);
   if (!session) return;
 
   let allPosts = [];

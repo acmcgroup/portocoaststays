@@ -61,7 +61,7 @@
 <script>
 (async () => {
   'use strict';
-  const session = await initSidebar('company-tasks');
+  const session = await initSidebar('company-tasks', ['admin', 'seller']);
   if (!session) return;
 
   const role = await AdminPortal.obterMeuRole();

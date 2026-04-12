@@ -63,7 +63,7 @@
 <script>
 (async () => {
   'use strict';
-  const session = await initSidebar('media', true);
+  const session = await initSidebar('media', ['admin', 'seller']);
   if (!session) return;
 
   let currentAsset = null;
