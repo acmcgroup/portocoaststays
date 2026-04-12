@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Para Empresas Gestoras — Porto Coast Stays</title>
+  <meta name="description" content="Plataforma de gestão de AL para empresas: PMS, pricing dinâmico, SIBA automático, portal do proprietário, iCal sync e faturação AT — tudo numa stack. Porto e Matosinhos.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="/assets/css/site.css" rel="stylesheet">
+  <style>
+    /* Tool replaced badge */
+    .replaced-badge {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--amber);
+      background: var(--amber-pale);
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      margin-left: 0.5rem;
+      white-space: nowrap;
+    }
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .tier-card {
+      padding: 2.5rem;
+      border-right: 1px solid var(--border);
+      background: var(--white);
+      position: relative;
+    }
+    .tier-card:last-child { border-right: none; }
+    .tier-card.featured { background: var(--ink); }
+    .tier-name {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 0.3rem;
+    }
+    .tier-card.featured .tier-name { color: var(--white); }
+    .tier-range {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      font-weight: 400;
+    }
+    .tier-card.featured .tier-range { color: rgba(255,255,255,0.45); }
+    .tier-price {
+      font-family: var(--font-display);
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+    .tier-card.featured .tier-price { color: var(--amber); }
+    .tier-price sup { font-size: 1.1rem; }
+    .tier-price-note {
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    .tier-card.featured .tier-price-note { color: rgba(255,255,255,0.4); }
+    .tier-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+    .tier-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+      font-size: 0.84rem;
+      color: var(--ink-2);
+      line-height: 1.5;
+    }
+    .tier-card.featured .tier-list li { color: rgba(255,255,255,0.75); }
+    .tier-list li::before {
+      content: '✓';
+      color: var(--green);
+      font-weight: 700;
+      font-size: 0.78rem;
+      margin-top: 0.1em;
+      flex-shrink: 0;
+    }
+    .tier-card.featured .tier-list li::before { color: var(--amber); }
+    .tier-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--green);
+      text-decoration: none;
+      transition: color var(--trans);
+    }
+    .tier-card.featured .tier-cta { color: var(--amber); }
+    .tier-cta:hover { opacity: 0.75; }
+    @media(max-width: 960px) {
+      .tier-grid { grid-template-columns: 1fr; }
+      .tier-card { border-right: none; border-bottom: 1px solid var(--border); }
+      .tier-card:last-child { border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Porto Coast <span>Stays</span></a>
+    <div class="nav-links">
+      <a href="#stack">A Stack</a>
+      <a href="#funcionalidades">Funcionalidades</a>
+      <a href="#precos">Preços</a>
+      <a href="mailto:hello@portocoaststays.com" class="btn btn-primary">Falar connosco →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">Para Empresas Gestoras de AL</div>
+    <h1>A vossa stack,<br><span class="break">num só sistema.</span></h1>
+    <p class="hero-sub">PMS, pricing dinâmico, check-in automático, SIBA por API, faturação AT e portal do proprietário — integrados numa plataforma. Sem mensalidades por ferramenta. Sem integrações frágeis.</p>
+    <div class="btn-group">
+      <a href="mailto:hello@portocoaststays.com" class="btn btn-primary">Agendar demonstração →</a>
+      <a href="#stack" class="btn btn-outline">Ver o que substituímos</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-right-label">Por que as gestoras escolhem PCS</div>
+    <div class="stat-list">
+      <div class="stat-row">
+        <div class="stat-num">5→1</div>
+        <div class="stat-label">Ferramentas substituídas por uma plataforma</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-num">€0</div>
+        <div class="stat-label">Mensalidades SaaS adicionais</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-num">100<sup>%</sup></div>
+        <div class="stat-label">SIBA automático por API, sem Chekin</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-num">30<sup>dias</sup></div>
+        <div class="stat-label">Aviso prévio — sem lock-in contratual</div>
+      </div>
+    </div>
+    <div class="hero-note">Plataforma construída para operar em Porto e Matosinhos. Compliance local (taxa turística, RNAL, SIBA) nativo — não como add-on.</div>
+  </div>
+</section>
+
+<!-- FERRAMENTAS SUBSTITUÍDAS -->
+<section id="stack">
+  <div class="container">
+    <div class="tag">A diferença</div>
+    <h2 class="section-heading">O que estão a pagar hoje<br>vs. o que pagam connosco.</h2>
+    <p class="section-lead">Uma gestora típica com 10 imóveis gasta €200–500/mês em ferramentas desconexas. Nós incluímos tudo, por imóvel, sem mensalidades fixas.</p>
+
+    <div class="stack-compare">
+      <div class="stack-col them">
+        <div class="stack-col-label">Stack fragmentada (mercado atual)</div>
+        <div class="tool-line">
+          <span class="tool-name">PMS — Hostaway / Smoobu</span>
+          <span class="tool-cost">€25–150/mês</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">Pricing dinâmico — Pricelabs</span>
+          <span class="tool-cost">€20/imóvel/mês</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">Check-in automático — Nuki</span>
+          <span class="tool-cost">€200+ por imóvel (hardware)</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">SIBA / SEF — Chekin / Akia</span>
+          <span class="tool-cost">€30–60/mês</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">Faturação AT — InvoiceXpress</span>
+          <span class="tool-cost">€15–30/mês</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">Portal do proprietário</span>
+          <span class="tool-cost">Não existe ou é manual</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">Sistema de tarefas / onboarding</span>
+          <span class="tool-cost">Notion, sheets, WhatsApp</span>
+        </div>
+        <div class="stack-total">
+          <span class="stack-total-label">Custo mensal estimado (10 imóveis)</span>
+          <span class="stack-total-val">€300–600</span>
+        </div>
+      </div>
+      <div class="stack-col us">
+        <div class="stack-col-label">Porto Coast Stays</div>
+        <div class="tool-line">
+          <span class="tool-name">PMS + Channel Manager</span>
+          <span class="tool-cost">Incluído</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">Pricing dinâmico (Pricelabs)</span>
+          <span class="tool-cost">Incluído</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">Nuki Smart Lock — hardware + setup</span>
+          <span class="tool-cost">€500 único/imóvel</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">SIBA automático (API SOAP própria)</span>
+          <span class="tool-cost">Incluído</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">Faturação IVA 6% + e-fatura AT</span>
+          <span class="tool-cost">Incluído</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">Portal do proprietário (real-time)</span>
+          <span class="tool-cost">Incluído</span>
+        </div>
+        <div class="tool-line">
+          <span class="tool-name">Sistema de tarefas e onboarding</span>
+          <span class="tool-cost">Incluído</span>
+        </div>
+        <div class="stack-total">
+          <span class="stack-total-label">Custo mensal (10 imóveis)</span>
+          <span class="stack-total-val">10% + €500/setup</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FUNCIONALIDADES PARA GESTORAS -->
+<section class="alt" id="funcionalidades">
+  <div class="container">
+    <div class="tag">Plataforma</div>
+    <h2 class="section-heading">Construído para quem<br>gere múltiplos imóveis.</h2>
+    <p class="section-lead">Cada funcionalidade foi desenhada para eliminar tarefas manuais, reduzir erros operacionais e dar visibilidade total em tempo real.</p>
+    <div class="card-grid">
+
+      <div class="grid-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </div>
+        <h3>Dashboard multi-imóvel</h3>
+        <p>Vista centralizada de todos os imóveis: ocupação, receita, próximas chegadas, tarefas pendentes e alertas. Acesso por role — admin vê tudo, proprietário vê o seu.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        </div>
+        <h3>Sistema de tarefas integrado</h3>
+        <p>Tarefas por imóvel [A] e globais [G] com responsável, criticidade e histórico. Onboarding de novos imóveis com checklist das 21 etapas (RNAL até go-live) sem perder passos.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <h3>Portal do proprietário</h3>
+        <p>Cada proprietário tem acesso ao seu imóvel em tempo real: ocupação, receita, reviews e agenda de limpeza. Sem precisar de ligar ou enviar e-mails.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M8 17l4 4 4-4m-4-5v9"/><path d="M20.88 18.09A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/></svg>
+        </div>
+        <h3>iCal sync + channel manager</h3>
+        <p>Sincronização em tempo real entre Airbnb e Booking.com via channel manager. iCal como fallback entre plataformas. Zero double bookings com calendário centralizado.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h3>SIBA automático por API</h3>
+        <p>Submissão de boletins de alojamento via API SOAP própria (siba.sef.pt) — sem dependência de Chekin ou Akia. Trigger no check-in, dentro do prazo legal de 3 dias úteis.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="card-icon amber">
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+        </div>
+        <h3>White-label pronto</h3>
+        <p>A plataforma opera com o vosso CLIENT_ID e branding. Proprietários veem o nome da vossa empresa — não o Porto Coast Stays. Pronto para escalar para a vossa carteira.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- COMPLIANCE LOCAL -->
+<section id="compliance">
+  <div class="container">
+    <div class="tag">Compliance local</div>
+    <h2 class="section-heading">Porto e Matosinhos.<br>Nativo, não add-on.</h2>
+    <p class="section-lead">O compliance AL em Portugal é complexo e local. Construímos a plataforma com estas obrigações desde o início — não como extensões a configurar por conta própria.</p>
+    <div class="card-grid card-grid-2">
+
+      <div class="grid-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>RNAL + SIBA / AIMA</h3>
+        <p>Gestão do número RNAL por imóvel (formato AL/Porto/XXXXX e AL/Matosinhos/XXXXX). SIBA automático via API SOAP com credenciais por titular — sem portal manual, sem Chekin. Prazo legal de 3 dias úteis garantido.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        </div>
+        <h3>Taxa turística municipal</h3>
+        <p>Porto (€2/noite) e Matosinhos (€1/noite) — cálculo automático, linha separada na fatura (IVA isento, distinto da dormida). Liquidação mensal via SIGTUR (Porto) e processo Matosinhos, com mandato da gestora.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h3>Faturação AT — IVA 6% + e-fatura</h3>
+        <p>InvoiceXpress integrado: fatura emitida automaticamente por reserva, IVA 6% na dormida, taxa turística isenta em linha separada. Transmissão automática à AT via e-fatura. Verificação mensal incluída.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Obrigações anuais e renováveis</h3>
+        <p>Comprovativo de atividade AL anual (gov.pt), renovação de seguro RC, atualização de dados RNAL, livro de reclamações eletrónico — geridos em sistema de tarefas com alertas automáticos antes dos prazos.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PREÇOS POR VOLUME -->
+<section class="alt" id="precos">
+  <div class="container">
+    <div class="tag">Preços para gestoras</div>
+    <h2 class="section-heading">Escalável à medida<br>da vossa carteira.</h2>
+    <p class="section-lead">Preço por imóvel, sem mensalidades fixas de ferramentas. Quanto mais cresce a carteira, mais o custo unitário desce.</p>
+    <div class="tier-grid">
+
+      <div class="tier-card">
+        <div class="price-card-label">Starter</div>
+        <div class="tier-name">1–5 imóveis</div>
+        <div class="tier-range">Para gestoras a iniciar ou com carteira pequena</div>
+        <div class="tier-price">10<sup>%</sup></div>
+        <div class="tier-price-note">por imóvel · + setup €500/imóvel (único)</div>
+        <ul class="tier-list">
+          <li>Plataforma completa por imóvel</li>
+          <li>PMS + channel manager incluídos</li>
+          <li>Pricing dinâmico (Pricelabs)</li>
+          <li>Nuki + setup (€500 único)</li>
+          <li>SIBA automático por API</li>
+          <li>Faturação AT automática</li>
+          <li>Portal do proprietário</li>
+          <li>Relatório mensal por imóvel</li>
+          <li>Suporte operacional incluído</li>
+        </ul>
+        <a href="mailto:hello@portocoaststays.com" class="tier-cta">Falar connosco →</a>
+      </div>
+
+      <div class="tier-card featured">
+        <div class="price-card-label">Growth</div>
+        <div class="tier-name">6–20 imóveis</div>
+        <div class="tier-range">Para gestoras a escalar com eficiência de custos</div>
+        <div class="tier-price">8<sup>%</sup></div>
+        <div class="tier-price-note">por imóvel · volume pricing · setup negociável</div>
+        <ul class="tier-list">
+          <li>Tudo do plano Starter</li>
+          <li>Comissão reduzida por volume</li>
+          <li>Setup em pacote negociável</li>
+          <li>Suporte dedicado (response &lt;4h)</li>
+          <li>Relatório consolidado da carteira</li>
+          <li>Dashboard gestora (todos os imóveis)</li>
+          <li>Integração com vosso contabilista</li>
+          <li>Onboarding assistido de novos imóveis</li>
+        </ul>
+        <a href="mailto:hello@portocoaststays.com" class="tier-cta">Agendar demo →</a>
+      </div>
+
+      <div class="tier-card">
+        <div class="price-card-label">Enterprise</div>
+        <div class="tier-name">20+ imóveis</div>
+        <div class="tier-range">Para gestoras a operar em escala ou com marca própria</div>
+        <div class="tier-price">Custom</div>
+        <div class="tier-price-note">pricing negociado · white-label incluído</div>
+        <ul class="tier-list">
+          <li>Tudo do plano Growth</li>
+          <li>White-label completo (vossa marca)</li>
+          <li>Acesso a API para integrações</li>
+          <li>SLA operacional personalizado</li>
+          <li>Multi-região (Porto + Matosinhos + expansão)</li>
+          <li>Gestor de conta dedicado</li>
+          <li>Roadmap co-desenvolvimento</li>
+          <li>Contrato à medida</li>
+        </ul>
+        <a href="mailto:hello@portocoaststays.com" class="tier-cta">Falar com a equipa →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- COMPARAÇÃO DE STACK COST -->
+<section id="comparacao">
+  <div class="container">
+    <div class="tag">Comparação de custos</div>
+    <h2 class="section-heading">O que a vossa stack<br>custa por mês.</h2>
+    <p class="section-lead">Estimativa para uma gestora com 10 imóveis activos, usando as ferramentas mais comuns no mercado AL português.</p>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Ferramenta / Tarefa</th>
+          <th class="hl">Porto Coast Stays</th>
+          <th>Stack tradicional</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>PMS + channel manager</td>
+          <td class="good">Incluído</td>
+          <td class="muted">€25–150/mês</td>
+        </tr>
+        <tr>
+          <td>Pricing dinâmico (10 imóveis)</td>
+          <td class="good">Incluído</td>
+          <td class="muted">€200/mês (Pricelabs)</td>
+        </tr>
+        <tr>
+          <td>SIBA / SEF (Chekin)</td>
+          <td class="good">Incluído (API própria)</td>
+          <td class="muted">€30–60/mês</td>
+        </tr>
+        <tr>
+          <td>Faturação AT</td>
+          <td class="good">Incluído</td>
+          <td class="muted">€15–30/mês</td>
+        </tr>
+        <tr>
+          <td>Portal do proprietário</td>
+          <td class="good">Incluído (real-time)</td>
+          <td class="muted">Não existe</td>
+        </tr>
+        <tr>
+          <td>Sistema de tarefas</td>
+          <td class="good">Incluído (nativo)</td>
+          <td class="muted">Notion / sheets (manual)</td>
+        </tr>
+        <tr>
+          <td>Taxa turística + compliance local</td>
+          <td class="good">Incluído (nativo)</td>
+          <td class="muted">Manual ou consultor extra</td>
+        </tr>
+        <tr class="sum">
+          <td>Custo mensal total de ferramentas</td>
+          <td class="good">€0 mensalidades SaaS</td>
+          <td class="muted">€270–440/mês</td>
+        </tr>
+        <tr class="sum">
+          <td>Poupança anual (10 imóveis)</td>
+          <td class="good">€3.240–5.280/ano</td>
+          <td class="muted">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="container">
+    <div class="tag">Próximo passo</div>
+    <h2>Vamos mostrar-vos<br>a plataforma em 30 min.</h2>
+    <p>Demo ao vivo com o vosso caso real: quantos imóveis, que ferramentas usam hoje, e o que poupam ao consolidar na nossa stack.</p>
+    <div class="btn-group">
+      <a href="mailto:hello@portocoaststays.com?subject=Demo%20Gestoras%20PCS" class="btn btn-amber">Agendar demo →</a>
+      <a href="index.html" class="btn btn-outline-white">Voltar ao início</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-logo">Porto Coast <span>Stays</span></div>
+      <div class="footer-links">
+        <a href="#stack">Stack substituída</a>
+        <a href="#funcionalidades">Funcionalidades</a>
+        <a href="#precos">Preços</a>
+        <a href="proprietarios.html">Proprietários</a>
+        <a href="mailto:hello@portocoaststays.com">hello@portocoaststays.com</a>
+      </div>
+      <div class="footer-note">Porto &amp; Matosinhos · Gestão de Alojamento Local · 2026</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
