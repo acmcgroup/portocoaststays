@@ -231,10 +231,9 @@ section.dark .section-lead { color: rgba(255,255,255,0.55); }
 /* ── Hero ────────────────────────────────────────────────────── */
 .hero {
   padding-top: 64px;
-  min-height: 100vh;
+  min-height: min(100vh, 800px);
   display: flex;
   align-items: stretch;
-  /* Split background: cream left / ink right — aligns with container columns at any viewport width */
   background: linear-gradient(90deg, var(--cream) 50%, var(--ink) 50%);
 }
 .hero > .container {
@@ -286,10 +285,11 @@ section.dark .section-lead { color: rgba(255,255,255,0.55); }
 .hero-right {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   padding: 5rem 0 5rem 3rem;
   position: relative;
   overflow: hidden;
+  border-left: 1px solid rgba(255,255,255,0.07);
 }
 .hero-right::before {
   content: '';
@@ -335,9 +335,8 @@ section.dark .section-lead { color: rgba(255,255,255,0.55); }
   line-height: 1.4;
 }
 .hero-note {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  margin-top: auto;
+  padding-top: 2rem;
   font-size: 0.74rem;
   color: rgba(255,255,255,0.3);
   line-height: 1.65;
