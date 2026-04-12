@@ -41,9 +41,11 @@
         <strong>Tasks [G] — âmbito global:</strong> realizadas uma vez para toda a carteira do proprietário (conta AT, IVA, contabilista, SIBA, software, etc.).
       </div>
       <div class="stats-row">
-        <div class="stat-box"><div class="stat-val" id="stat-total">—</div><div class="stat-label">Total tasks</div></div>
-        <div class="stat-box"><div class="stat-val" id="stat-done">—</div><div class="stat-label">Concluídas</div></div>
-        <div class="stat-box"><div class="stat-val" id="stat-blocked">—</div><div class="stat-label">Bloqueadas</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-total">—</div><div class="stat-label">Total</div></div>
+        <div class="stat-box"><div class="stat-val stat-val--pending" id="stat-pending">—</div><div class="stat-label">Pendentes</div></div>
+        <div class="stat-box"><div class="stat-val stat-val--inprogress" id="stat-inprogress">—</div><div class="stat-label">Em curso</div></div>
+        <div class="stat-box"><div class="stat-val stat-val--done" id="stat-done">—</div><div class="stat-label">Concluídas</div></div>
+        <div class="stat-box"><div class="stat-val stat-val--blocked" id="stat-blocked">—</div><div class="stat-label">Bloqueadas</div></div>
         <div class="stat-box">
           <div class="progress-bar-wrap" style="margin-bottom:4px"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
           <div class="stat-label"><span id="pct-label">0%</span> concluído</div>
@@ -139,15 +141,19 @@
   }
 
   function renderStats(list) {
-    const total   = templates.length;
-    const done    = templates.filter(t => (statuses[t.id] || 'pending') === 'completed').length;
-    const blocked = templates.filter(t => (statuses[t.id] || 'pending') === 'blocked').length;
-    const pct     = total ? Math.round((done / total) * 100) : 0;
-    document.getElementById('stat-total').textContent   = total;
-    document.getElementById('stat-done').textContent    = done;
-    document.getElementById('stat-blocked').textContent = blocked;
-    document.getElementById('progress-fill').style.width = pct + '%';
-    document.getElementById('pct-label').textContent = pct + '%';
+    const total      = templates.length;
+    const done       = templates.filter(t => (statuses[t.id] || 'pending') === 'completed').length;
+    const blocked    = templates.filter(t => (statuses[t.id] || 'pending') === 'blocked').length;
+    const inProgress = templates.filter(t => (statuses[t.id] || 'pending') === 'in_progress').length;
+    const pending    = templates.filter(t => (statuses[t.id] || 'pending') === 'pending').length;
+    const pct        = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById('stat-total').textContent      = total;
+    document.getElementById('stat-pending').textContent    = pending;
+    document.getElementById('stat-inprogress').textContent = inProgress;
+    document.getElementById('stat-done').textContent       = done;
+    document.getElementById('stat-blocked').textContent    = blocked;
+    document.getElementById('progress-fill').style.width  = pct + '%';
+    document.getElementById('pct-label').textContent      = pct + '%';
   }
 
   function renderTasks() {
