@@ -13,7 +13,7 @@
 CREATE OR REPLACE FUNCTION public.portal_role_check(p_client text, p_roles text[])
 RETURNS boolean
 LANGUAGE plpgsql
-STABLE
+VOLATILE
 SECURITY DEFINER
 SET search_path = public
 AS $$
